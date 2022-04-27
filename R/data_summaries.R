@@ -25,7 +25,7 @@ get_data_summary <- function(data_segm, year) {
   # nam_div <- names(attr(tests_data2$SamDivision, "labels"))
 
   tests_data  <- data_segm %>% dplyr::select(dplyr::starts_with("kat"))
-  tests_data2 <- data_segm %>% dplyr::select(SamDivision,
+  tests_data2 <- data_segm %>% dplyr::select(.data$SamDivision,
                                              dplyr::starts_with("kat"))
   nam_div <- names(attr(tests_data2$SamDivision, "labels"))
   check_rowsums <- lapply((tests_data %>% lapply(table)), sum)
@@ -34,30 +34,30 @@ get_data_summary <- function(data_segm, year) {
   # df_final_divisions <- list()
 
   # tests_data2 <- tests_data2[order(tests_data2$SamDivision), ]
-  df_final_divisions <- tests_data2 %>% dplyr::group_by(SamDivision,
-                                                        kat_kommunikasjon) %>%
-    dplyr::summarise(kommunikasjon_perc = n())
+  df_final_divisions <- tests_data2 %>% dplyr::group_by(.data$SamDivision,
+                                                        .data$kat_kommunikasjon) %>%
+    dplyr::summarise(kommunikasjon_perc = dplyr::n())
   df_final_divisions <- dplyr::full_join(df_final_divisions,
-                                             tests_data2 %>% dplyr::group_by(SamDivision,
-                                                                             kat_informasjon1) %>%
-                                               dplyr::summarise(informasjon_perc = n()),
+                                             tests_data2 %>% dplyr::group_by(.data$SamDivision,
+                                                                             .data$kat_informasjon1) %>%
+                                               dplyr::summarise(informasjon_perc = dplyr::n()),
                                              by = c("SamDivision", "kat_kommunikasjon" = "kat_informasjon1"))
   df_final_divisions <- dplyr::full_join(df_final_divisions,
-                                             tests_data2 %>% dplyr::group_by(SamDivision,
-                                                                             kat_programmer1) %>%
-                                               dplyr::summarise(programmer_perc = n()),
+                                             tests_data2 %>% dplyr::group_by(.data$SamDivision,
+                                                                             .data$kat_programmer1) %>%
+                                               dplyr::summarise(programmer_perc = dplyr::n()),
                                              by = c("SamDivision", "kat_kommunikasjon" = "kat_programmer1"))
   df_final_divisions <- dplyr::full_join(df_final_divisions,
-                                             tests_data2 %>% dplyr::group_by(SamDivision,
-                                                                             kat_utstyr1) %>%
-                                               dplyr::summarise(utstyr_perc = n()),
+                                             tests_data2 %>% dplyr::group_by(.data$SamDivision,
+                                                                             .data$kat_utstyr1) %>%
+                                               dplyr::summarise(utstyr_perc = dplyr::n()),
                                              by = c("SamDivision", "kat_kommunikasjon" = "kat_utstyr1"))
   df_final_divisions <- df_final_divisions %>%
     dplyr::rowwise() %>%
-    dplyr::mutate(total_perc = sum(kommunikasjon_perc,
-                                   informasjon_perc,
-                                   programmer_perc,
-                                   utstyr_perc, na.rm = TRUE))
+    dplyr::mutate(total_perc = sum(.data$kommunikasjon_perc,
+                                   .data$informasjon_perc,
+                                   .data$programmer_perc,
+                                   .data$utstyr_perc, na.rm = TRUE))
 
   df_final_divisions <- df_final_divisions[order(df_final_divisions$SamDivision,
                                                  df_final_divisions$kat_kommunikasjon),]
@@ -83,15 +83,15 @@ get_data_summary <- function(data_segm, year) {
                                                    df_final_divisions$kat_kommunikasjon),]
   }
 
-  use_sum <- df_final_divisions %>% group_by(SamDivision) %>% summarise(use_sum = sum(kommunikasjon_perc, na.rm = TRUE)) %>% pull(use_sum)
+  use_sum <- df_final_divisions %>% dplyr::group_by(.data$SamDivision) %>% dplyr::summarise(use_sum = sum(.data$kommunikasjon_perc, na.rm = TRUE)) %>% dplyr::pull(use_sum)
   df_final_divisions$kommunikasjon_perc <- round(df_final_divisions$kommunikasjon_perc/rep(use_sum, each = 4) * 100, digits = 2)
-  use_sum <- df_final_divisions %>% group_by(SamDivision) %>% summarise(use_sum = sum(informasjon_perc, na.rm = TRUE)) %>% pull(use_sum)
+  use_sum <- df_final_divisions %>% dplyr::group_by(.data$SamDivision) %>% dplyr::summarise(use_sum = sum(.data$informasjon_perc, na.rm = TRUE)) %>% dplyr::pull(use_sum)
   df_final_divisions$informasjon_perc <- round(df_final_divisions$informasjon_perc/rep(use_sum, each = 4) * 100, digits = 2)
-  use_sum <- df_final_divisions %>% group_by(SamDivision) %>% summarise(use_sum = sum(programmer_perc, na.rm = TRUE)) %>% pull(use_sum)
+  use_sum <- df_final_divisions %>% dplyr::group_by(.data$SamDivision) %>% dplyr::summarise(use_sum = sum(.data$programmer_perc, na.rm = TRUE)) %>% dplyr::pull(use_sum)
   df_final_divisions$programmer_perc <- round(df_final_divisions$programmer_perc/rep(use_sum, each = 4) * 100, digits = 2)
-  use_sum <- df_final_divisions %>% group_by(SamDivision) %>% summarise(use_sum = sum(utstyr_perc, na.rm = TRUE)) %>% pull(use_sum)
+  use_sum <- df_final_divisions %>% dplyr::group_by(.data$SamDivision) %>% dplyr::summarise(use_sum = sum(.data$utstyr_perc, na.rm = TRUE)) %>% dplyr::pull(use_sum)
   df_final_divisions$utstyr_perc <- round(df_final_divisions$utstyr_perc/rep(use_sum, each = 4) * 100, digits = 2)
-  use_sum <- df_final_divisions %>% group_by(SamDivision) %>% summarise(use_sum = sum(total_perc, na.rm = TRUE)) %>% pull(use_sum)
+  use_sum <- df_final_divisions %>% dplyr::group_by(.data$SamDivision) %>% dplyr::summarise(use_sum = sum(.data$total_perc, na.rm = TRUE)) %>% dplyr::pull(use_sum)
   df_final_divisions$total_perc <- round(df_final_divisions$total_perc/rep(use_sum, each = 4) * 100, digits = 2)
 
   df_final_divisions$SamDivision <- factor(df_final_divisions$SamDivision, labels = nam_div)
@@ -124,19 +124,21 @@ get_data_summary <- function(data_segm, year) {
     dplyr::mutate(prop_u = .data$utstyr_freq / sum(df_final_data$utstyr_freq) *100) %>%
     dplyr::mutate(ypos_u = cumsum(.data$prop_u)- 0.5*.data$prop_u) %>%
     dplyr::rowwise() %>%
-    dplyr::mutate(total_freq = sum(kommunikasjon_freq,
-                                   informasjon_freq,
-                                   programmer_freq,
-                                   utstyr_freq)) %>%
-    dplyr::mutate(total_freq_perc =round(total_freq/(4*num_obs), digits = 2))
+    dplyr::mutate(total_freq = sum(.data$kommunikasjon_freq,
+                                   .data$informasjon_freq,
+                                   .data$programmer_freq,
+                                   .data$utstyr_freq)) %>%
+    dplyr::mutate(total_freq_perc =round(.data$total_freq/(4*num_obs), digits = 2))
 
   df_final_report <- df_final_data %>%
-    dplyr::select(kategorier, kommunikasjon_freq, informasjon_freq,
-                  programmer_freq, utstyr_freq, total_freq,
-                  kommunikasjon_freq_perc, informasjon_freq_perc,
-                  programmer_freq_perc, utstyr_freq_perc, total_freq_perc)
+    dplyr::select(.data$kategorier, .data$kommunikasjon_freq,
+                  .data$informasjon_freq, .data$programmer_freq,
+                  .data$utstyr_freq, .data$total_freq,
+                  .data$kommunikasjon_freq_perc, .data$informasjon_freq_perc,
+                  .data$programmer_freq_perc, .data$utstyr_freq_perc,
+                  .data$total_freq_perc)
 
-  df_final_report <- df_final_report %>% dplyr::mutate_at(.vars = vars(contains("perc")),
+  df_final_report <- df_final_report %>% dplyr::mutate_at(.vars = dplyr::vars(dplyr::contains("perc")),
                                                           .funs = function(x) {x/100})
   df_final_report$year <- year
   df_final_report <- df_final_report %>%
