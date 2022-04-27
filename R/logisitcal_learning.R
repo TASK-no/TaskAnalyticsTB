@@ -20,7 +20,7 @@
 #'   \itemize{
 #'     \item Uerfaren
 #'     \item Grunnleggende
-#'     \item Videregående
+#'     \item `Videreg\u00e5ende`
 #'     \item Avansert
 #'   }
 #'
@@ -32,7 +32,7 @@ get_data_for_prediction <- function(data_set,
                                     regressors,
                                     experience_levels) {
   coding_experience <- c(Uerfaren = 1, Grunnleggende = 2,
-                         Videregående = 3, Avansert = 4)
+                         "Videreg\u00e5ende" = 3, Avansert = 4)
   data_short <- data_set %>% dplyr::select(dependent, regressors)
   all_vars <- c(dependent, regressors)
   data_short <- tibble::as_tibble(lapply(data_short[all_vars], as.factor))
@@ -76,10 +76,9 @@ logistic_learn <- function(data_set,
                                                  collapse=" + "),
                                            sep=" ~ "))
 
-  logistic_model <- NULL
-  # logistic_model <- stats::glm(model_formula,
-  #                              data = data_short_selected,
-  #                              family = binomial(link="logit"))
+  logistic_model <- stats::glm(model_formula,
+                               data = data_short_selected,
+                               family = stats::binomial(link="logit"))
   summary_logistic_model <- summary(logistic_model)
   summary_odds <- exp(summary_logistic_model$coefficients[, 1, drop = FALSE])
   colnames(summary_odds) <- "Odds"

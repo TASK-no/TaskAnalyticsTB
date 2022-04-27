@@ -38,20 +38,21 @@ get_data_summary <- function(data_segm, year) {
                                                         .data$kat_kommunikasjon) %>%
     dplyr::summarise(kommunikasjon_perc = dplyr::n())
   df_final_divisions <- dplyr::full_join(df_final_divisions,
-                                             tests_data2 %>% dplyr::group_by(.data$SamDivision,
-                                                                             .data$kat_informasjon1) %>%
-                                               dplyr::summarise(informasjon_perc = dplyr::n()),
-                                             by = c("SamDivision", "kat_kommunikasjon" = "kat_informasjon1"))
+                                         tests_data2 %>%
+                                           dplyr::group_by(.data$SamDivision,
+                                                           .data$kat_informasjon1) %>%
+                                           dplyr::summarise(informasjon_perc = dplyr::n()),
+                                         by = c("SamDivision", "kat_kommunikasjon" = "kat_informasjon1"))
   df_final_divisions <- dplyr::full_join(df_final_divisions,
-                                             tests_data2 %>% dplyr::group_by(.data$SamDivision,
-                                                                             .data$kat_programmer1) %>%
-                                               dplyr::summarise(programmer_perc = dplyr::n()),
-                                             by = c("SamDivision", "kat_kommunikasjon" = "kat_programmer1"))
+                                         tests_data2 %>% dplyr::group_by(.data$SamDivision,
+                                                                         .data$kat_programmer1) %>%
+                                           dplyr::summarise(programmer_perc = dplyr::n()),
+                                         by = c("SamDivision", "kat_kommunikasjon" = "kat_programmer1"))
   df_final_divisions <- dplyr::full_join(df_final_divisions,
-                                             tests_data2 %>% dplyr::group_by(.data$SamDivision,
-                                                                             .data$kat_utstyr1) %>%
-                                               dplyr::summarise(utstyr_perc = dplyr::n()),
-                                             by = c("SamDivision", "kat_kommunikasjon" = "kat_utstyr1"))
+                                         tests_data2 %>% dplyr::group_by(.data$SamDivision,
+                                                                         .data$kat_utstyr1) %>%
+                                           dplyr::summarise(utstyr_perc = dplyr::n()),
+                                         by = c("SamDivision", "kat_kommunikasjon" = "kat_utstyr1"))
   df_final_divisions <- df_final_divisions %>%
     dplyr::rowwise() %>%
     dplyr::mutate(total_perc = sum(.data$kommunikasjon_perc,
@@ -67,7 +68,10 @@ get_data_summary <- function(data_segm, year) {
   if (length(change_vec) > 0) {
     for (i in 1:length(change_vec)) {
       missing_kat <- df_final_divisions[df_final_divisions$SamDivision == change_vec[i], ][["kat_kommunikasjon"]]
-      missing_kat <- setdiff(c("Uerfaren", "Grunnleggende", "Videregående", "Avansert"),
+      missing_kat <- setdiff(c("Uerfaren", "Grunnleggende", paste0("Videreg",
+                                                                   "\u00e5",
+                                                                   "ende"),
+                               "Avansert"),
                              missing_kat)
 
       impute_vec <- list(SamDivision = unique(df_final_divisions$SamDivision)[change_vec[i]],

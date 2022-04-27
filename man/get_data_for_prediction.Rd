@@ -18,7 +18,7 @@ vector with values of either
 \itemize{
   \item Uerfaren
   \item Grunnleggende
-  \item Videregående
+  \item `Videreg\u00e5ende`
   \item Avansert
 }}
 }
