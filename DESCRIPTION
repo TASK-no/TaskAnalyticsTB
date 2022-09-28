@@ -1,4 +1,4 @@
-Package: taskAnalytics
+Package: TaskAnalyticsTB
 Type: Package
 Title: What the Package Does (Title Case)
 Version: 0.1.0
@@ -9,7 +9,7 @@ Description: More about what it does (maybe more than one line)
 License: file LICENSE
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.1
 Imports: 
     rlang,
     magrittr,

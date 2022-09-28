@@ -13,5 +13,5 @@
 #' @importFrom tidyr "pivot_longer"
 #'
 #' @docType package
-#' @name BK21
+#' @name TaskAnalyticsTB
 NULL

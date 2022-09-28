@@ -20,7 +20,7 @@
 #'   \itemize{
 #'     \item Uerfaren
 #'     \item Grunnleggende
-#'     \item `Videreg\u00e5ende`
+#'     \item Videregende
 #'     \item Avansert
 #'   }
 #'
