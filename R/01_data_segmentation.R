@@ -5,8 +5,6 @@
 #' @return data set after segmentation analysis
 #' @export
 segmentation_analysis <- function(data_SVV) {
-
-
   # Q14
   data_SVV$Q14r1[data_SVV$Q14r1 == 5] <- 1
   data_SVV$Q14r2[data_SVV$Q14r2 == 5] <- 1
@@ -35,15 +33,11 @@ segmentation_analysis <- function(data_SVV) {
   # Segmenteringsvariabler for Q16 - Kommunikasjon og samhandling
   mydata16 <- recode_q16(data_SVV)
   # Segmenteringsvariabler for Q17 -Informasjonssikkerhet og personvern
-
   mydata32 <- recode_q17(mydata16)
-
   ################################################################################
   ##################        Segmenteringsvariabler for        ####################
   ##################         Q14: Bruk av programvare         ####################
   ################################################################################
-
-
   ## Diktomisere samtlige variabler - kriterie: må ha svart 3 eller 4 for å få
   ## verdi 1, 0 om annet
 

@@ -14,7 +14,6 @@
 #' @param sum_score_val_avan numeric score value for summation score of
 #'   "avansert"; if summation score larger/larger than/equal
 #'   `sum_score_val_avan`, then employee has avansert skills
-#' @param verbose used to print additional information, now deprecated
 #'
 #' @return a data set with additional variables, most importantly
 #'   "kat_kommunikasjon" which is a factor:
@@ -29,8 +28,7 @@ recode_q16 <- function(data_set,
                        from_vals =c(3, 4),
                        sum_score_val_grun = 4,
                        sum_score_val_vide = 2,
-                       sum_score_val_avan = 2,
-                       verbose = FALSE) {
+                       sum_score_val_avan = 2) {
   data_tmp <- data_set
   #### Coding of 'kat_kommunikasjon' from Q16
   #### Sets the value 5 to 1 on ALL indicator variables
@@ -68,21 +66,6 @@ recode_q16 <- function(data_set,
     dplyr::mutate(kom10 = dplyr::if_else(.data$Q16r10 %in% from_vals, 1, 0)) %>%
     dplyr::mutate(kom11 = dplyr::if_else(.data$Q16r11 %in% from_vals, 1, 0))
 
-  if (verbose) {
-    # NOT NECESSARY ANYMORE
-    # Check that it looks right: compare original var with dichotomous var
-    # as.factor(data_out$kom1)
-    # as.factor(data_out$kom2)
-    # as.factor(data_out$kom3)
-    # as.factor(data_out$kom4)
-    # as.factor(data_out$kom5)
-    # as.factor(data_out$kom6)
-    # table(data_tmp$Q16r1, useNA = "always")
-    # table(mydata$kom1, useNA = "always") # will be correct
-    # table(mydata$kom10, useNA = "always")
-    # # #    0    1 <NA>
-    # # # 1334  591    0
-  }
   # Generate new variable taking the sum of the 6 variables in grunnleggende
   data_out <- data_out %>%
     dplyr::mutate(grunnleg_kom_sum = rowSums(dplyr::pick(.data$kom1,
@@ -151,8 +134,7 @@ recode_q17 <- function(data_set,
                        from_vals =c(3, 4),
                        sum_score_val_grun = 3,
                        sum_score_val_vide = 3,
-                       sum_score_val_avan = 2,
-                       verbose = FALSE) {
+                       sum_score_val_avan = 2) {
   data_tmp <- data_set
   # Coding of 'kat_informasjon1' from Q17
   # Sets the value 5 to 1 on ALL indicator variables
