@@ -3,6 +3,7 @@
 export(get_data_summary)
 export(logistic_learn)
 export(recode_q16)
+export(recode_q17)
 export(segmentation_analysis)
 importFrom(magrittr,"%>%")
 importFrom(readxl,"excel_sheets")
