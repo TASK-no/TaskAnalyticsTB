@@ -189,6 +189,98 @@ recode_q17 <- function(data_set,
                                          avan_info, kat_informasjon1)
   return(data_out)
 }
+#' Data segmentation based on Q14
+#'
+#' Generate data set with segmentation variables for "Proficiency in using
+#' software".
+#'
+#' @inheritParams recode_q16
+#'
+#' @return a data set with additional variables, most importantly
+#'   "kat_programmer1" which is a factor:
+#'   \itemize{
+#'   \item "Uerfaren": 0
+#'   \item "Grunnleggende": 1
+#'   \item "Videregående": 2
+#'   \item "Avansert": 3
+#'   }
+#' @export
+recode_q14 <- function(data_set,
+                       from_vals = c(3, 4),
+                       sum_score_val_grun = 2,
+                       sum_score_val_vide = 3,
+                       sum_score_val_avan = 2) {
+  data_out <- data_set
+  # Coding of 'kat_programmer1' from Q17
+  # Sets the value 5 to 1 on ALL indicator variables
+  data_out <- data_out %>% recode_qXX_rVals(q_names = paste0("Q14r", 1:8),
+                                            from = 5, to = 1)
+  testvec <- names(data_out)
+  # Create new dichotomous variables where values 3 and 4 of the indicator are
+  # given a value of 1, and 0 otherwise (see argument 'from_vals')
+  #### Start with grunnleggende niva -> Q14r1 - Q14r3
+  ## 1. Generate summation score variable for gunnleggende prog taking the sum
+  ##    of the first four prog vars
+  ## 2. Re-code summation score into 1 if larger than reference value (e.g. = 2)
+  ##    zero else
+  data_out <- data_out %>% generate_segmentation_variable(name_recode1 = "prog",
+                                                          from_vals = from_vals,
+                                                          seq_recode = 1:3,
+                                                          name_var_old = "Q14r",
+                                                          name_var_sum = "grunnleg_prog_sum",
+                                                          name_var_seg = "grunn_prog1",
+                                                          ref_val = sum_score_val_grun,
+                                                          type = "larger-equal")
+
+  #### Videregaende niva -> Q14r4 - Q14r6
+  ## 1. Create an aggregate variable for secondary education where you have to
+  ##    have answered 3/4 on 2 out of 3 to be in the category (same as in
+  ##    kat_kommunikasjon)
+  ## 2. Re-code into 0 if summation score for videre equals reference value
+  ##    (e.g. 3), zero else
+  data_out <- data_out %>% generate_segmentation_variable(name_recode1 = "prog",
+                                                          from_vals = from_vals,
+                                                          seq_recode = 4:6,
+                                                          name_var_old = "Q14r",
+                                                          name_var_sum = "videre_prog_sum",
+                                                          name_var_seg = "videre_prog",
+                                                          ref_val = sum_score_val_vide,
+                                                          type = "equal")
+  #### Avansert niva -> Q14r7 - Q14r8
+  ## 1. Re-code into 1 if all prog vars 7-8 are present to get aggregate
+  ##    variable for advanced skills
+  data_out <- data_out %>% generate_segmentation_variable(name_recode1 = "prog",
+                                                          from_vals = from_vals,
+                                                          seq_recode = 7:8,
+                                                          name_var_old = "Q14r",
+                                                          name_var_sum = "avan_prog_sum",
+                                                          name_var_seg = "avan_prog",
+                                                          ref_val = sum_score_val_avan,
+                                                          type = "equal")
+  # Overall categorical variable for Q14 - kat_programmer1
+  data_out <- data_out %>%
+      dplyr::mutate(kat_programmer1 = dplyr::case_when(
+        (grunn_prog1 == 0) ~ 0L,
+        (grunn_prog1 == 1 & videre_prog == 0 & avan_prog == 0) ~ 1L,
+        (grunn_prog1 == 1 & videre_prog == 1 & avan_prog == 0 |
+           grunn_prog1 == 1 & videre_prog == 0 & avan_prog == 1) ~ 2L,
+        (grunn_prog1 == 1 & videre_prog == 1 & avan_prog == 1) ~ 3L,
+        TRUE ~ NA_integer_))
+  # Transform to factor
+  data_out$kat_programmer1 <- factor(data_out$kat_programmer1,
+                                      levels = c(0, 1, 2, 3),
+                                      labels = c("Uerfaren",
+                                                 "Grunnleggende",
+                                                 "Videregående",
+                                                 "Avansert"))
+  data_out <- data_out %>% dplyr::select(tidyselect::all_of(testvec),
+                                         prog1, prog2, prog3, prog4, prog5,
+                                         prog6, prog7, prog8,
+                                         grunnleg_prog_sum, grunn_prog1,
+                                         videre_prog_sum, videre_prog,
+                                         avan_prog, kat_programmer1)
+  return(data_out)
+}
 recode_qXX_rVals <- function(data_set, q_names, from = 5, to = 1) {
   data_out <- data_set
   for (i in q_names) {
