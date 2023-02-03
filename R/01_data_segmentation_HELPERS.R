@@ -25,76 +25,54 @@
 #'   }
 #' @export
 recode_q16 <- function(data_set,
-                       from_vals =c(3, 4),
+                       from_vals = c(3, 4),
                        sum_score_val_grun = 4,
                        sum_score_val_vide = 2,
                        sum_score_val_avan = 2) {
-  data_tmp <- data_set
+  data_out <- data_set
   #### Coding of 'kat_kommunikasjon' from Q16
   #### Sets the value 5 to 1 on ALL indicator variables
-  data_tmp$Q16r1[data_tmp$Q16r1 == 5] <- 1
-  data_tmp$Q16r2[data_tmp$Q16r2 == 5] <- 1
-  data_tmp$Q16r3[data_tmp$Q16r3 == 5] <- 1
-  data_tmp$Q16r4[data_tmp$Q16r4 == 5] <- 1
-  data_tmp$Q16r5[data_tmp$Q16r5 == 5] <- 1
-  data_tmp$Q16r6[data_tmp$Q16r6 == 5] <- 1
-  data_tmp$Q16r7[data_tmp$Q16r7 == 5] <- 1
-  data_tmp$Q16r8[data_tmp$Q16r8 == 5] <- 1
-  data_tmp$Q16r9[data_tmp$Q16r9 == 5] <- 1
-  data_tmp$Q16r10[data_tmp$Q16r10 == 5] <- 1
-  data_tmp$Q16r11[data_tmp$Q16r11 == 5] <- 1
-
-  data_out <- data_tmp
+  data_out <- data_out %>% recode_qXX_rVals(q_names = paste0("Q16r", 1:11),
+                                            from = 5, to = 1)
+  testvec <- names(data_out)
   # Create new dichotomous variables where values 3 and 4 of the indicator are
   # given a value of 1, and 0 otherwise (see argument 'from_vals')
-  #### Start with grunnleggende niva
-  #### Q16r1 - Q16r6
-  data_out <- data_out %>%
-    dplyr::mutate(kom1 = dplyr::if_else(.data$Q16r1 %in% from_vals, 1, 0)) %>%
-    dplyr::mutate(kom2 = dplyr::if_else(.data$Q16r2 %in% from_vals, 1, 0)) %>%
-    dplyr::mutate(kom3 = dplyr::if_else(.data$Q16r3 %in% from_vals, 1, 0)) %>%
-    dplyr::mutate(kom4 = dplyr::if_else(.data$Q16r4 %in% from_vals, 1, 0)) %>%
-    dplyr::mutate(kom5 = dplyr::if_else(.data$Q16r5 %in% from_vals, 1, 0)) %>%
-    dplyr::mutate(kom6 = dplyr::if_else(.data$Q16r6 %in% from_vals, 1, 0))
-  #### Videregaende niva
-  data_out <- data_out %>%
-    dplyr::mutate(kom7 = dplyr::if_else(.data$Q16r7 %in% from_vals, 1, 0)) %>%
-    dplyr::mutate(kom8 = dplyr::if_else(.data$Q16r8 %in% from_vals, 1, 0)) %>%
-    dplyr::mutate(kom9 = dplyr::if_else(.data$Q16r9 %in% from_vals, 1, 0))
-  #### Avansert niva
-  data_out <- data_out %>%
-    dplyr::mutate(kom10 = dplyr::if_else(.data$Q16r10 %in% from_vals, 1, 0)) %>%
-    dplyr::mutate(kom11 = dplyr::if_else(.data$Q16r11 %in% from_vals, 1, 0))
-
-  # Generate new variable taking the sum of the 6 variables in grunnleggende
-  data_out <- data_out %>%
-    dplyr::mutate(grunnleg_kom_sum = rowSums(dplyr::pick(.data$kom1,
-                                                         .data$kom2,
-                                                         .data$kom3,
-                                                         .data$kom4,
-                                                         .data$kom5,
-                                                         .data$kom6)))
-  # Generate new variable that says that if score on basic_com is 4 or higher,
-  # then value = 1, 0 if not
-  data_out <- data_out %>%
-    dplyr::mutate(grunn_kom = dplyr::if_else(.data$grunnleg_kom_sum >= sum_score_val_grun,
-                                             1, 0))
-  # Create an aggregate variable for high school
-  # Sample one for high school with less strict criteria:
-  # Create one where you must have answered 3/4 on 2 out of 3 to be in the category
-  data_out <- data_out %>%
-    dplyr::mutate(videre_kom_sum = rowSums(dplyr::pick(.data$kom7,
-                                                       .data$kom8,
-                                                       .data$kom9)))
-  # Generate a new variable that says that if the score on videre_kom is 2 or
-  # higher, then value = 1, 0 if n
-  data_out <- data_out %>%
-    dplyr::mutate(videre_kom = dplyr::if_else(.data$videre_kom_sum >= sum_score_val_vide,
-                                              1, 0))
-  # Create an overall variable for advanced/avansert
-  data_out <- data_out %>%
-    dplyr::mutate(avan_kom = dplyr::if_else(.data$kom10 == 1 & .data$kom11 == 1,
-                                            1, 0))
+  #### Start with grunnleggende niva -> Q16r1 - Q16r6
+  ## 1. Generate new variable taking the sum of the 6 variables in grunnleggende
+  ## 2. Generate new variable that says that if score on basic_com is 4 or
+  ##    higher, then value = 1, 0 if not
+  data_out <- data_out %>% generate_segmentation_variable(name_recode1 = "kom",
+                                                          from_vals = from_vals,
+                                                          seq_recode = 1:6,
+                                                          name_var_old = "Q16r",
+                                                          name_var_sum = "grunnleg_kom_sum",
+                                                          name_var_seg = "grunn_kom",
+                                                          ref_val = sum_score_val_grun,
+                                                          type = "larger-equal")
+  #### Videregaende niva -> Q16r7 - Q16r9
+  ## 1. Create an aggregate variable for high school. Sample one for high school
+  ##    with less strict criteria: create one where you must have answered 3/4
+  ##    on 2 out of 3 to be in the category
+  ## 2. Generate a new variable that says that if the score on videre_kom is 2
+  ##    or higher, then value = 2, 0 else
+  data_out <- data_out %>% generate_segmentation_variable(name_recode1 = "kom",
+                                                          from_vals = from_vals,
+                                                          seq_recode = 7:9,
+                                                          name_var_old = "Q16r",
+                                                          name_var_sum = "videre_kom_sum",
+                                                          name_var_seg = "videre_kom",
+                                                          ref_val = sum_score_val_vide,
+                                                          type = "larger-equal")
+  #### Avansert niva -> Q16r10 - Q16r11
+  ## 1. Create an overall variable for advanced/avansert
+  data_out <- data_out %>% generate_segmentation_variable(name_recode1 = "kom",
+                                                          from_vals = from_vals,
+                                                          seq_recode = 10:11,
+                                                          name_var_old = "Q16r",
+                                                          name_var_sum = "avan_kom_sum",
+                                                          name_var_seg = "avan_kom",
+                                                          ref_val = sum_score_val_avan,
+                                                          type = "equal")
   # Total categorical variable for Q16
   data_out <- data_out %>%
     dplyr::mutate(kat_kommunikasjon = dplyr::case_when(
@@ -104,7 +82,6 @@ recode_q16 <- function(data_set,
          grunn_kom == 1 & videre_kom == 0 & avan_kom == 1) ~ 2L,
       (grunn_kom == 1 & videre_kom == 1 & avan_kom == 1) ~ 3L,
       TRUE ~ NA_integer_))
-
   # Transform to factor
   data_out$kat_kommunikasjon <- factor(data_out$kat_kommunikasjon,
                                        levels = c(0, 1, 2, 3),
@@ -112,6 +89,12 @@ recode_q16 <- function(data_set,
                                                   "Grunnleggende",
                                                   "Videregående",
                                                   "Avansert"))
+  data_out <- data_out %>% dplyr::select(tidyselect::all_of(testvec),
+                                         kom1, kom2, kom3, kom4, kom5,
+                                         kom6, kom7, kom8, kom9, kom10, kom11,
+                                         grunnleg_kom_sum, grunn_kom,
+                                         videre_kom_sum, videre_kom,
+                                         avan_kom, kat_kommunikasjon)
   return(data_out)
 }
 #' Data segmentation based on Q17
@@ -131,72 +114,57 @@ recode_q16 <- function(data_set,
 #'   }
 #' @export
 recode_q17 <- function(data_set,
-                       from_vals =c(3, 4),
+                       from_vals = c(3, 4),
                        sum_score_val_grun = 3,
                        sum_score_val_vide = 3,
-                       sum_score_val_avan = 2) {
-  data_tmp <- data_set
+                       sum_score_val_avan = 3) {
+  data_out <- data_set
   # Coding of 'kat_informasjon1' from Q17
   # Sets the value 5 to 1 on ALL indicator variables
-  data_tmp$Q17r1[data_tmp$Q17r1 == 5] <- 1
-  data_tmp$Q17r2[data_tmp$Q17r2 == 5] <- 1
-  data_tmp$Q17r3[data_tmp$Q17r3 == 5] <- 1
-  data_tmp$Q17r4[data_tmp$Q17r4 == 5] <- 1
-  data_tmp$Q17r5[data_tmp$Q17r5 == 5] <- 1
-  data_tmp$Q17r6[data_tmp$Q17r6 == 5] <- 1
-  data_tmp$Q17r7[data_tmp$Q17r7 == 5] <- 1
-  data_tmp$Q17r8[data_tmp$Q17r8 == 5] <- 1
-  data_tmp$Q17r9[data_tmp$Q17r9 == 5] <- 1
-  data_tmp$Q17r10[data_tmp$Q17r10 == 5] <- 1
-
-  data_out <- data_tmp
+  data_out <- data_out %>% recode_qXX_rVals(q_names = paste0("Q17r", 1:10),
+                                            from = 5, to = 1)
+  testvec <- names(data_out)
   # Create new dichotomous variables where values 3 and 4 of the indicator are
   # given a value of 1, and 0 otherwise (see argument 'from_vals')
-  #### Start with grunnleggende niva
-  #### Q17r1 - Q17r4
-  data_out <- data_out %>%
-    dplyr::mutate(info1 = dplyr::if_else(.data$Q17r1 %in% from_vals, 1, 0)) %>%
-    dplyr::mutate(info2 = dplyr::if_else(.data$Q17r2 %in% from_vals, 1, 0)) %>%
-    dplyr::mutate(info3 = dplyr::if_else(.data$Q17r3 %in% from_vals, 1, 0)) %>%
-    dplyr::mutate(info4 = dplyr::if_else(.data$Q17r4 %in% from_vals, 1, 0))
-  #### Videregaende niva
-  data_out <- data_out %>%
-    dplyr::mutate(info5 = dplyr::if_else(.data$Q17r5 %in% from_vals, 1, 0)) %>%
-    dplyr::mutate(info6 = dplyr::if_else(.data$Q17r6 %in% from_vals, 1, 0)) %>%
-    dplyr::mutate(info7 = dplyr::if_else(.data$Q17r7 %in% from_vals, 1, 0))
-  #### Avansert niva
-  data_out <- data_out %>%
-    dplyr::mutate(info8 = dplyr::if_else(.data$Q17r8 %in% from_vals, 1, 0)) %>%
-    dplyr::mutate(info9 = dplyr::if_else(.data$Q17r9 %in% from_vals, 1, 0)) %>%
-    dplyr::mutate(info10 = dplyr::if_else(.data$Q17r10 %in% from_vals, 1, 0))
+  #### Start with grunnleggende niva -> Q17r1 - Q17r4
+  ## 1. Generate summation score variable for gunnleggende info taking the sum
+  ##    of the first four info vars
+  ## 2. Re-code summation score into 1 if larger than reference value (e.g. = 3)
+  ##    zero else
+  data_out <- data_out %>% generate_segmentation_variable(name_recode1 = "info",
+                                                          from_vals = from_vals,
+                                                          seq_recode = 1:4,
+                                                          name_var_old = "Q17r",
+                                                          name_var_sum = "grunnleg_info_sum",
+                                                          name_var_seg = "grunn_info1",
+                                                          ref_val = sum_score_val_grun,
+                                                          type = "larger-equal")
 
-  # Generate summation score variable for gunnleggende info taking the sum of
-  # the first four info vars
-  data_out <- data_out %>%
-    dplyr::mutate(grunnleg_info_sum = rowSums(dplyr::pick(.data$info1,
-                                                          .data$info2,
-                                                          .data$info3,
-                                                          .data$info4)))
-  # Re-code summation score into 1 if larger than reference value (e.g. = 3)
-  # zero else
-  data_out <- data_out %>%
-    dplyr::mutate(grunn_info1 = dplyr::if_else(.data$grunnleg_info_sum >= sum_score_val_grun,
-                                               1, 0))
-  # Create an aggregate variable for secondary education where you have to have
-  # answered 3/4 on 2 out of 3 to be in the category (same as in
-  # kat_kommunikasjon)
-  data_out <- data_out %>%
-    dplyr::mutate(videre_info_sum = rowSums(dplyr::pick(.data$info5,
-                                                        .data$info6,
-                                                        .data$info7)))
-  # Re-code into 1 if summation score for videre equals reference value(e.g. 3),
-  # zero else
-  data_out <- data_out %>%
-    dplyr::mutate(videre_info = dplyr::if_else(.data$videre_info_sum == sum_score_val_vide, 1, 0))
-  # Re-code into 1 if all info vars 8-10 are present to get aggregate variable
-  # for advanced skills
-  data_out <- data_out %>%
-    dplyr::mutate(avan_info = dplyr::if_else(.data$info8 == 1 & .data$info9 == 1 & .data$info10 == 1, 1, 0))
+  #### Videregaende niva -> Q17r5 - Q17r7
+  ## 1. Create an aggregate variable for secondary education where you have to
+  ##    have answered 3/4 on 2 out of 3 to be in the category (same as in
+  ##    kat_kommunikasjon)
+  ## 2. Re-code into 0 if summation score for videre equals reference value
+  ##    (e.g. 3), zero else
+  data_out <- data_out %>% generate_segmentation_variable(name_recode1 = "info",
+                                                          from_vals = from_vals,
+                                                          seq_recode = 5:7,
+                                                          name_var_old = "Q17r",
+                                                          name_var_sum = "videre_info_sum",
+                                                          name_var_seg = "videre_info",
+                                                          ref_val = sum_score_val_vide,
+                                                          type = "equal")
+  #### Avansert niva -> Q17r8 - Q17r10
+  ## 1. Re-code into 1 if all info vars 8-10 are present to get aggregate
+  ##    variable for advanced skills
+  data_out <- data_out %>% generate_segmentation_variable(name_recode1 = "info",
+                                                          from_vals = from_vals,
+                                                          seq_recode = 8:10,
+                                                          name_var_old = "Q17r",
+                                                          name_var_sum = "avan_info_sum",
+                                                          name_var_seg = "avan_info",
+                                                          ref_val = sum_score_val_avan,
+                                                          type = "equal")
   # Overall categorical variable for Q17 - kat_informasjon1
   data_out <- data_out %>%
     dplyr::mutate(kat_informasjon1 = dplyr::case_when(
@@ -206,7 +174,6 @@ recode_q17 <- function(data_set,
          grunn_info1 == 1 & videre_info == 0 & avan_info == 1) ~ 2L,
       (grunn_info1 == 1 & videre_info == 1 & avan_info == 1) ~ 3L,
       TRUE ~ NA_integer_))
-
   # Transform to factor
   data_out$kat_informasjon1 <- factor(data_out$kat_informasjon1,
                                       levels = c(0, 1, 2, 3),
@@ -214,5 +181,59 @@ recode_q17 <- function(data_set,
                                                  "Grunnleggende",
                                                  "Videregående",
                                                  "Avansert"))
+  data_out <- data_out %>% dplyr::select(tidyselect::all_of(testvec),
+                                         info1, info2, info3, info4, info5,
+                                         info6, info7, info8, info9, info10,
+                                         grunnleg_info_sum, grunn_info1,
+                                         videre_info_sum, videre_info,
+                                         avan_info, kat_informasjon1)
   return(data_out)
+}
+recode_qXX_rVals <- function(data_set, q_names, from = 5, to = 1) {
+  data_out <- data_set
+  for (i in q_names) {
+    data_set[[i]][data_set[[i]] == from] <- to
+  }
+  return(data_set)
+}
+generate_segmentation_variable <- function(data_set,
+                                           from_vals,
+                                           seq_recode,
+                                           name_recode1,
+                                           name_var_old,
+                                           name_var_sum,
+                                           name_var_seg,
+                                           ref_val,
+                                           type) {
+  new_var <- paste0(name_recode1, seq_recode)
+  old_var <- paste0(name_var_old, seq_recode)
+  seq_run <- seq_along(seq_recode)
+  for (i in seq_run) {
+    tmp_var <- new_var[i]
+    data_set <- data_set %>%
+      dplyr::mutate("{tmp_var}" := recode_skills_present(.data[[old_var[i]]],
+                                                         from_vals = from_vals))
+  }
+  data_set %>%
+    dplyr::mutate("{name_var_sum}" := get_sum_score(new_var)) %>%
+    dplyr::mutate("{name_var_seg}" := sum_score_exceed(.data[[name_var_sum]],
+                                                       ref_val = ref_val,
+                                                       type = type))
+}
+recode_skills_present <- function(var, from_vals) {
+  dplyr::if_else(var %in% from_vals, 1, 0)
+}
+get_sum_score <- function(var) {
+  rowSums(dplyr::pick(tidyselect::all_of(var)))
+}
+sum_score_exceed <- function(var, ref_val, type) {
+  if (type == "larger") {
+    dplyr::if_else(var > ref_val, 1, 0)
+  } else if (type == "equal") {
+    dplyr::if_else(var == ref_val, 1, 0)
+  } else if (type == "larger-equal") {
+    dplyr::if_else(var >= ref_val, 1, 0)
+  } else {
+    stop("unknown arg value for 'type'")
+  }
 }
