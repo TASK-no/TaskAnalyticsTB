@@ -9,8 +9,7 @@ recode_q16(
   from_vals = c(3, 4),
   sum_score_val_grun = 4,
   sum_score_val_vide = 2,
-  sum_score_val_avan = 2,
-  verbose = FALSE
+  sum_score_val_avan = 2
 )
 }
 \arguments{
@@ -29,8 +28,6 @@ recode_q16(
 \item{sum_score_val_avan}{numeric score value for summation score of
 "avansert"; if summation score larger/larger than/equal
 `sum_score_val_avan`, then employee has avansert skills}
-
-\item{verbose}{used to print additional information, now deprecated}
 }
 \value{
 a data set with additional variables, most importantly
