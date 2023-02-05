@@ -8,7 +8,7 @@
 #'   }
 #'
 #' @param data_segm a \code{data.frame} or \code{tibble} of segmented data (this
-#'   is typically the raw data set being run through the function ....)
+#'   is typically the raw data set being run through [segmentation_analysis()]
 #' @param year the year as a numeric variable
 #'
 #' @return a list of three elements: \itemize{
