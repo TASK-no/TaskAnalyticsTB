@@ -14,8 +14,12 @@ Imports:
     rlang,
     magrittr,
     dplyr,
+    tidyselect,
     tibble,
     utils,
     tidyr,
     readxl,
-    stats
+    stats,
+    ggplot2,
+    grid,
+    gridExtra
