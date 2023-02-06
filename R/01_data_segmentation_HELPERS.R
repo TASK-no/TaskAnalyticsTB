@@ -75,20 +75,10 @@ recode_q16 <- function(data_set,
                                                           type = "equal")
   # Total categorical variable for Q16
   data_out <- data_out %>%
-    dplyr::mutate(kat_kommunikasjon = dplyr::case_when(
-      (grunn_kom == 0) ~ 0L,
-      (grunn_kom == 1 & videre_kom == 0 & avan_kom == 0) ~ 1L,
-      (grunn_kom == 1 & videre_kom == 1 & avan_kom == 0 |
-         grunn_kom == 1 & videre_kom == 0 & avan_kom == 1) ~ 2L,
-      (grunn_kom == 1 & videre_kom == 1 & avan_kom == 1) ~ 3L,
-      TRUE ~ NA_integer_))
-  # Transform to factor
-  data_out$kat_kommunikasjon <- factor(data_out$kat_kommunikasjon,
-                                       levels = c(0, 1, 2, 3),
-                                       labels = c("Uerfaren",
-                                                  "Grunnleggende",
-                                                  "Videregående",
-                                                  "Avansert"))
+    add_overall_kat( name_kat = "kat_kommunikasjon",
+                    names_segmentation_vars = c("grunn_kom",
+                                                "videre_kom",
+                                                "avan_kom"))
   data_out <- data_out %>% dplyr::select(tidyselect::all_of(testvec),
                                          kom1, kom2, kom3, kom4, kom5,
                                          kom6, kom7, kom8, kom9, kom10, kom11,
@@ -167,20 +157,10 @@ recode_q17 <- function(data_set,
                                                           type = "equal")
   # Overall categorical variable for Q17 - kat_informasjon1
   data_out <- data_out %>%
-    dplyr::mutate(kat_informasjon1 = dplyr::case_when(
-      (grunn_info1 == 0) ~ 0L,
-      (grunn_info1 == 1 & videre_info == 0 & avan_info == 0) ~ 1L,
-      (grunn_info1 == 1 & videre_info == 1 & avan_info == 0 |
-         grunn_info1 == 1 & videre_info == 0 & avan_info == 1) ~ 2L,
-      (grunn_info1 == 1 & videre_info == 1 & avan_info == 1) ~ 3L,
-      TRUE ~ NA_integer_))
-  # Transform to factor
-  data_out$kat_informasjon1 <- factor(data_out$kat_informasjon1,
-                                      levels = c(0, 1, 2, 3),
-                                      labels = c("Uerfaren",
-                                                 "Grunnleggende",
-                                                 "Videregående",
-                                                 "Avansert"))
+    add_overall_kat(name_kat = "kat_informasjon1",
+                    names_segmentation_vars = c("grunn_info1",
+                                                "videre_info",
+                                                "avan_info"))
   data_out <- data_out %>% dplyr::select(tidyselect::all_of(testvec),
                                          info1, info2, info3, info4, info5,
                                          info6, info7, info8, info9, info10,
@@ -259,20 +239,10 @@ recode_q14 <- function(data_set,
                                                           type = "equal")
   # Overall categorical variable for Q14 - kat_programmer1
   data_out <- data_out %>%
-      dplyr::mutate(kat_programmer1 = dplyr::case_when(
-        (grunn_prog1 == 0) ~ 0L,
-        (grunn_prog1 == 1 & videre_prog == 0 & avan_prog == 0) ~ 1L,
-        (grunn_prog1 == 1 & videre_prog == 1 & avan_prog == 0 |
-           grunn_prog1 == 1 & videre_prog == 0 & avan_prog == 1) ~ 2L,
-        (grunn_prog1 == 1 & videre_prog == 1 & avan_prog == 1) ~ 3L,
-        TRUE ~ NA_integer_))
-  # Transform to factor
-  data_out$kat_programmer1 <- factor(data_out$kat_programmer1,
-                                      levels = c(0, 1, 2, 3),
-                                      labels = c("Uerfaren",
-                                                 "Grunnleggende",
-                                                 "Videregående",
-                                                 "Avansert"))
+    add_overall_kat(name_kat = "kat_programmer1",
+                    names_segmentation_vars = c("grunn_prog1",
+                                                "videre_prog",
+                                                "avan_prog"))
   data_out <- data_out %>% dplyr::select(tidyselect::all_of(testvec),
                                          prog1, prog2, prog3, prog4, prog5,
                                          prog6, prog7, prog8,
@@ -351,20 +321,10 @@ recode_q19 <- function(data_set,
                                                           type = "equal")
   # Overall categorical variable for Q19 - kat_utstyrr1
   data_out <- data_out %>%
-    dplyr::mutate(kat_utstyr1 = dplyr::case_when(
-      (grunn_utstyr1 == 0) ~ 0L,
-      (grunn_utstyr1 == 1 & videre_utstyr == 0 & avan_utstyr == 0) ~ 1L,
-      (grunn_utstyr1 == 1 & videre_utstyr == 1 & avan_utstyr == 0 |
-         grunn_utstyr1 == 1 & videre_utstyr == 0 & avan_utstyr == 1) ~ 2L,
-      (grunn_utstyr1 == 1 & videre_utstyr == 1 & avan_utstyr == 1) ~ 3L,
-      TRUE ~ NA_integer_))
-  # Transform to factor
-  data_out$kat_utstyr1 <- factor(data_out$kat_utstyr1,
-                                     levels = c(0, 1, 2, 3),
-                                     labels = c("Uerfaren",
-                                                "Grunnleggende",
-                                                "Videregående",
-                                                "Avansert"))
+    add_overall_kat(name_kat = "kat_utstyr1",
+                    names_segmentation_vars = c("grunn_utstyr1",
+                                                "videre_utstyr",
+                                                "avan_utstyr"))
   data_out <- data_out %>% dplyr::select(tidyselect::all_of(testvec),
                                          utstyr1, utstyr2, utstyr3, utstyr4,
                                          utstyr5, utstyr6, utstyr7, utstyr8,
@@ -421,4 +381,26 @@ sum_score_exceed <- function(var, ref_val, type) {
   } else {
     stop("unknown arg value for 'type'")
   }
+}
+add_overall_kat <- function(data_set, name_kat,
+                            names_segmentation_vars,
+                            kat_levels = 0:3,
+                            kat_labels = c("Uerfaren",
+                                           "Grunnleggende",
+                                           # "Videregående",
+                                           "Videregaende",
+                                           "Avansert")) {
+  data_out <- data_set %>%
+    dplyr::mutate("{name_kat}" := dplyr::case_when(
+      (.data[[names_segmentation_vars[1]]] == 0) ~ 0L,
+      (.data[[names_segmentation_vars[1]]] == 1 & .data[[names_segmentation_vars[2]]] == 0 & .data[[names_segmentation_vars[3]]] == 0) ~ 1L,
+      (.data[[names_segmentation_vars[1]]] == 1 & .data[[names_segmentation_vars[2]]] == 1 & .data[[names_segmentation_vars[3]]] == 0 |
+         .data[[names_segmentation_vars[1]]] == 1 & .data[[names_segmentation_vars[2]]] == 0 & .data[[names_segmentation_vars[3]]] == 1) ~ 2L,
+      (.data[[names_segmentation_vars[1]]] == 1 & .data[[names_segmentation_vars[2]]] == 1 & .data[[names_segmentation_vars[3]]] == 1) ~ 3L,
+      TRUE ~ NA_integer_))
+  # Transform to factor
+  data_out[[name_kat]] <- factor(data_out[[name_kat]],
+                                 levels = kat_levels,
+                                 labels = kat_labels)
+  return(data_out)
 }
