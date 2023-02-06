@@ -388,7 +388,10 @@ add_overall_kat <- function(data_set, name_kat,
                             kat_labels = c("Uerfaren",
                                            "Grunnleggende",
                                            # "Videregående",
-                                           "Videregaende",
+                                           # "Videregaende",
+                                           paste0("Videreg",
+                                                  "\u00e5",
+                                                  "ende"),
                                            "Avansert")) {
   data_out <- data_set %>%
     dplyr::mutate("{name_kat}" := dplyr::case_when(
