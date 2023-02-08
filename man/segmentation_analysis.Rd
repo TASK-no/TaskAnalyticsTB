@@ -4,7 +4,22 @@
 \alias{segmentation_analysis}
 \title{Perform a segmentation analysis on the raw data}
 \usage{
-segmentation_analysis(data_SVV)
+segmentation_analysis(
+  data_SVV,
+  ind1_vals = c(3, 4),
+  settings_q16 = list(sum_score_val_grun = 4, sum_score_val_vide = 2, sum_score_val_avan
+    = 2, type_val_grun = "larger-equal", type_val_vide = "larger-equal", type_val_avan =
+    "equal"),
+  settings_q17 = list(sum_score_val_grun = 3, sum_score_val_vide = 3, sum_score_val_avan
+    = 3, type_val_grun = "larger-equal", type_val_vide = "equal", type_val_avan =
+    "equal"),
+  settings_q14 = list(sum_score_val_grun = 2, sum_score_val_vide = 3, sum_score_val_avan
+    = 2, type_val_grun = "larger-equal", type_val_vide = "equal", type_val_avan =
+    "equal"),
+  settings_q19 = list(sum_score_val_grun = 2, sum_score_val_vide = 5, sum_score_val_avan
+    = 3, type_val_grun = "larger-equal", type_val_vide = "equal", type_val_avan =
+    "equal")
+)
 }
 \arguments{
 \item{data_SVV}{raw data (as a \code{data.frame})}

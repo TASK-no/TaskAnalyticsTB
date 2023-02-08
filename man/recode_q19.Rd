@@ -9,7 +9,10 @@ recode_q19(
   from_vals = c(3, 4),
   sum_score_val_grun = 2,
   sum_score_val_vide = 5,
-  sum_score_val_avan = 3
+  sum_score_val_avan = 3,
+  type_val_grun = "larger-equal",
+  type_val_vide = "equal",
+  type_val_avan = "equal"
 )
 }
 \arguments{
@@ -28,6 +31,18 @@ recode_q19(
 \item{sum_score_val_avan}{numeric score value for summation score of
 "avansert"; if summation score larger/larger than/equal
 `sum_score_val_avan`, then employee has avansert skills}
+
+\item{type_val_grun}{character string: either "larger-equal" or "equal" to
+indicate how to apply the sum_score threshold (allow larger/equal to get 1
+or only equality to that sum_score to get a 1 indicator, zero else)}
+
+\item{type_val_vide}{character string: either "larger-equal" or "equal" to
+indicate how to apply the sum_score threshold (allow larger/equal to get 1
+or only equality to that sum_score to get a 1 indicator, zero else)}
+
+\item{type_val_avan}{character string: either "larger-equal" or "equal" to
+indicate how to apply the sum_score threshold (allow larger/equal to get 1
+or only equality to that sum_score to get a 1 indicator, zero else)}
 }
 \value{
 a data set with additional variables, most importantly
