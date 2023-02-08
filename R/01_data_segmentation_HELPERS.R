@@ -14,6 +14,15 @@
 #' @param sum_score_val_avan numeric score value for summation score of
 #'   "avansert"; if summation score larger/larger than/equal
 #'   `sum_score_val_avan`, then employee has avansert skills
+#' @param type_val_grun character string: either "larger-equal" or "equal" to
+#'   indicate how to apply the sum_score threshold (allow larger/equal to get 1
+#'   or only equality to that sum_score to get a 1 indicator, zero else)
+#' @param type_val_vide character string: either "larger-equal" or "equal" to
+#'   indicate how to apply the sum_score threshold (allow larger/equal to get 1
+#'   or only equality to that sum_score to get a 1 indicator, zero else)
+#' @param type_val_avan character string: either "larger-equal" or "equal" to
+#'   indicate how to apply the sum_score threshold (allow larger/equal to get 1
+#'   or only equality to that sum_score to get a 1 indicator, zero else)
 #'
 #' @return a data set with additional variables, most importantly
 #'   "kat_kommunikasjon" which is a factor:
@@ -28,7 +37,10 @@ recode_q16 <- function(data_set,
                        from_vals = c(3, 4),
                        sum_score_val_grun = 4,
                        sum_score_val_vide = 2,
-                       sum_score_val_avan = 2) {
+                       sum_score_val_avan = 2,
+                       type_val_grun = "larger-equal",
+                       type_val_vide = "larger-equal",
+                       type_val_avan = "equal") {
   data_out <- data_set
   #### Coding of 'kat_kommunikasjon' from Q16
   #### Sets the value 5 to 1 on ALL indicator variables
@@ -48,7 +60,7 @@ recode_q16 <- function(data_set,
                                                           name_var_sum = "grunnleg_kom_sum",
                                                           name_var_seg = "grunn_kom",
                                                           ref_val = sum_score_val_grun,
-                                                          type = "larger-equal")
+                                                          type = type_val_grun)
   #### Videregaende niva -> Q16r7 - Q16r9
   ## 1. Create an aggregate variable for high school. Sample one for high school
   ##    with less strict criteria: create one where you must have answered 3/4
@@ -62,7 +74,7 @@ recode_q16 <- function(data_set,
                                                           name_var_sum = "videre_kom_sum",
                                                           name_var_seg = "videre_kom",
                                                           ref_val = sum_score_val_vide,
-                                                          type = "larger-equal")
+                                                          type = type_val_vide)
   #### Avansert niva -> Q16r10 - Q16r11
   ## 1. Create an overall variable for advanced/avansert
   data_out <- data_out %>% generate_segmentation_variable(name_recode1 = "kom",
@@ -72,7 +84,7 @@ recode_q16 <- function(data_set,
                                                           name_var_sum = "avan_kom_sum",
                                                           name_var_seg = "avan_kom",
                                                           ref_val = sum_score_val_avan,
-                                                          type = "equal")
+                                                          type = type_val_avan)
   # Total categorical variable for Q16
   data_out <- data_out %>%
     add_overall_kat( name_kat = "kat_kommunikasjon",
@@ -107,7 +119,10 @@ recode_q17 <- function(data_set,
                        from_vals = c(3, 4),
                        sum_score_val_grun = 3,
                        sum_score_val_vide = 3,
-                       sum_score_val_avan = 3) {
+                       sum_score_val_avan = 3,
+                       type_val_grun = "larger-equal",
+                       type_val_vide = "equal",
+                       type_val_avan = "equal") {
   data_out <- data_set
   # Coding of 'kat_informasjon1' from Q17
   # Sets the value 5 to 1 on ALL indicator variables
@@ -128,7 +143,7 @@ recode_q17 <- function(data_set,
                                                           name_var_sum = "grunnleg_info_sum",
                                                           name_var_seg = "grunn_info1",
                                                           ref_val = sum_score_val_grun,
-                                                          type = "larger-equal")
+                                                          type = type_val_grun)
 
   #### Videregaende niva -> Q17r5 - Q17r7
   ## 1. Create an aggregate variable for secondary education where you have to
@@ -143,7 +158,7 @@ recode_q17 <- function(data_set,
                                                           name_var_sum = "videre_info_sum",
                                                           name_var_seg = "videre_info",
                                                           ref_val = sum_score_val_vide,
-                                                          type = "equal")
+                                                          type = type_val_vide)
   #### Avansert niva -> Q17r8 - Q17r10
   ## 1. Re-code into 1 if all info vars 8-10 are present to get aggregate
   ##    variable for advanced skills
@@ -154,7 +169,7 @@ recode_q17 <- function(data_set,
                                                           name_var_sum = "avan_info_sum",
                                                           name_var_seg = "avan_info",
                                                           ref_val = sum_score_val_avan,
-                                                          type = "equal")
+                                                          type = type_val_avan)
   # Overall categorical variable for Q17 - kat_informasjon1
   data_out <- data_out %>%
     add_overall_kat(name_kat = "kat_informasjon1",
@@ -189,7 +204,10 @@ recode_q14 <- function(data_set,
                        from_vals = c(3, 4),
                        sum_score_val_grun = 2,
                        sum_score_val_vide = 3,
-                       sum_score_val_avan = 2) {
+                       sum_score_val_avan = 2,
+                       type_val_grun = "larger-equal",
+                       type_val_vide = "equal",
+                       type_val_avan = "equal") {
   data_out <- data_set
   # Coding of 'kat_programmer1' from Q14
   # Sets the value 5 to 1 on ALL indicator variables
@@ -210,7 +228,7 @@ recode_q14 <- function(data_set,
                                                           name_var_sum = "grunnleg_prog_sum",
                                                           name_var_seg = "grunn_prog1",
                                                           ref_val = sum_score_val_grun,
-                                                          type = "larger-equal")
+                                                          type = type_val_grun)
 
   #### Videregaende niva -> Q14r4 - Q14r6
   ## 1. Create an aggregate variable for secondary education where you have to
@@ -225,7 +243,7 @@ recode_q14 <- function(data_set,
                                                           name_var_sum = "videre_prog_sum",
                                                           name_var_seg = "videre_prog",
                                                           ref_val = sum_score_val_vide,
-                                                          type = "equal")
+                                                          type = type_val_vide)
   #### Avansert niva -> Q14r7 - Q14r8
   ## 1. Re-code into 1 if all prog vars 7-8 are present to get aggregate
   ##    variable for advanced skills
@@ -236,7 +254,7 @@ recode_q14 <- function(data_set,
                                                           name_var_sum = "avan_prog_sum",
                                                           name_var_seg = "avan_prog",
                                                           ref_val = sum_score_val_avan,
-                                                          type = "equal")
+                                                          type = type_val_avan)
   # Overall categorical variable for Q14 - kat_programmer1
   data_out <- data_out %>%
     add_overall_kat(name_kat = "kat_programmer1",
@@ -271,7 +289,10 @@ recode_q19 <- function(data_set,
                        from_vals = c(3, 4),
                        sum_score_val_grun = 2,
                        sum_score_val_vide = 5,
-                       sum_score_val_avan = 3) {
+                       sum_score_val_avan = 3,
+                       type_val_grun = "larger-equal",
+                       type_val_vide = "equal",
+                       type_val_avan = "equal") {
   data_out <- data_set
   # Coding of 'kat_utstyr1' from Q19
   # Sets the value 5 to 1 on ALL indicator variables
@@ -292,7 +313,7 @@ recode_q19 <- function(data_set,
                                                           name_var_sum = "grunnleg_utstyr_sum",
                                                           name_var_seg = "grunn_utstyr1",
                                                           ref_val = sum_score_val_grun,
-                                                          type = "larger-equal")
+                                                          type = type_val_grun)
 
   #### Videregaende niva -> Q19r4 - Q19r8
   ## 1. Create an aggregate variable for secondary education where you have to
@@ -307,7 +328,7 @@ recode_q19 <- function(data_set,
                                                           name_var_sum = "videre_utstyr_sum",
                                                           name_var_seg = "videre_utstyr",
                                                           ref_val = sum_score_val_vide,
-                                                          type = "equal")
+                                                          type = type_val_vide)
   #### Avansert niva -> Q19r9 - Q19r11
   ## 1. Re-code into 1 if all utstyr vars 9-11 are present to get aggregate
   ##    variable for advanced skills
@@ -318,7 +339,7 @@ recode_q19 <- function(data_set,
                                                           name_var_sum = "avan_utstyr_sum",
                                                           name_var_seg = "avan_utstyr",
                                                           ref_val = sum_score_val_avan,
-                                                          type = "equal")
+                                                          type = type_val_avan)
   # Overall categorical variable for Q19 - kat_utstyrr1
   data_out <- data_out %>%
     add_overall_kat(name_kat = "kat_utstyr1",
