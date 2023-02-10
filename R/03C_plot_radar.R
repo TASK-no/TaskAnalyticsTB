@@ -39,12 +39,12 @@ plot_radar <- function(df, year, col_scm = c(light_blue = "#189BC4",
     ggplot2::theme(axis.text = ggplot2::element_text(size = 10),
                    axis.title = ggplot2::element_text(size = 14),
                    # legend.justification = c(1, 0),
-                   legend.position = "bottom",
+                   # legend.position = "bottom",
                    # legend.text = ggplot2::element_text(paste0("Kompetanseomr",
                    #                                            "\u00e5", "der")),
                    # legend.title = ggplot2::element_text(paste0("Kompetanseomr",
                    #                                             "\u00e5", "der")),
-                   legend.title = ggplot2::element_blank(),
+                   # legend.title = ggplot2::element_blank(),
                    panel.grid.major = ggplot2::element_blank(),
                    panel.grid.minor = ggplot2::element_blank(),
                    plot.title = ggplot2::element_text(hjust = 0.5,
@@ -73,6 +73,11 @@ get_data_summary_radar <- function(data_set) {
                                                   "programmer_freq_perc",
                                                   "informasjon_freq_perc",
                                                   "kommunikasjon_freq_perc"),
-                                       ordered = TRUE)
-  return(data_out)
+                                       ordered = TRUE) %>%
+    dplyr::recode_factor(kommunikasjon_freq_perc = "Kommunikasjon og samhandling",
+                         informasjon_freq_perc = "Informasjonssikkerhet og personvern",
+                         programmer_freq_perc = "Bruk av programmvare",
+                         utstyr_freq_perc = "Bruk av teknologi",
+                         .ordered = TRUE)
+  data_out %>% dplyr::select(year, kategorier, kompetanseomrader, value)
 }
