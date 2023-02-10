@@ -84,8 +84,13 @@ calculate_per_vars <- function(df, name_var) {
   df[[name_var]] <- tmp_perc
   return(df)
 }
-round_perc <- function(var_to_round, total_sum, digits) {
-  round(var_to_round / total_sum * 100, digits = digits)
+round_perc <- function(var_to_round, total_sum, digits, add_perc_sign = FALSE) {
+  if (add_perc_sign) {
+    # paste0(round(var_to_round / total_sum * 100, digits = digits), "%")
+    round(var_to_round / total_sum * 100, digits = digits)
+  } else {
+    round(var_to_round / total_sum * 100, digits = digits)
+  }
 }
 add_missing_kat <- function(df) {
   change_vec <- which(unname(sapply(table(df$SamDivision),
