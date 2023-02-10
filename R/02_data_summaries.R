@@ -10,6 +10,9 @@
 #' @param data_segm a \code{data.frame} or \code{tibble} of segmented data (this
 #'   is typically the raw data set being run through [segmentation_analysis()]
 #' @param year the year as a numeric variable
+#' @param type the type of data set to return; if 'all' then a list of all three
+#'    as described in "Value" are returned, otherwise for "report", "divisions",
+#'    or "final", only the corresponding subtype is returned
 #'
 #' @return a list of three elements: \itemize{
 #'     \item \code{df_final_data} the final data set
@@ -18,17 +21,24 @@
 #'   }
 #'   see the details section, for more information on each data set.
 #' @export
-get_data_summary <- function(data_segm, year) {
+get_data_summary <- function(data_segm, year, type = "all") {
   data_sub <- data_segm %>% dplyr::select(.data$SamDivision,
                                           dplyr::starts_with("kat"))
-
-  df_final_data      <- generate_data_final(data_sub[-1])
-  df_final_divisions <- generate_data_division(data_sub)
-  df_final_report    <- generate_data_report(df_final_data, year)
-
-  return(list(df_final_data = df_final_data,
-              df_final_report = df_final_report,
-              df_final_divisions = df_final_divisions))
+  if (type == "all") {
+    df_final_data      <- generate_data_final(data_sub[-1])
+    df_final_divisions <- generate_data_division(data_sub)
+    df_final_report    <- generate_data_report(df_final_data, year)
+    return(list(df_final_data = df_final_data,
+                df_final_report = df_final_report,
+                df_final_divisions = df_final_divisions))
+  } else if (type == "final") {
+    generate_data_final(data_sub[-1])
+  } else if (type == "divisions") {
+    generate_data_final(generate_data_division(data_sub)[-1])
+  } else if (type == "report") {
+    df_final_data <- generate_data_final(data_sub[-1])
+    generate_data_report(df_final_data, year)
+  }
 }
 generate_data_division <- function(df) {
   nam_div <- names(attr(df$SamDivision, "labels"))
@@ -93,8 +103,9 @@ round_perc <- function(var_to_round, total_sum, digits, add_perc_sign = FALSE) {
   }
 }
 add_missing_kat <- function(df) {
-  change_vec <- which(unname(sapply(table(df$SamDivision),
-                                    function(x) {x < 4})))
+  # browser()
+  change_vec <- get_vec_of_changes(df$SamDivision)
+  sam_unique <- get_sam_div_unique(df$SamDivision)
   if (length(change_vec) > 0) {
     for (i in 1:length(change_vec)) {
       missing_kat <- df[df$SamDivision == change_vec[i], ][["kat_kommunikasjon"]]
@@ -106,20 +117,32 @@ add_missing_kat <- function(df) {
                                "Avansert"),
                              missing_kat)
 
-      impute_vec <- list(SamDivision = unique(df$SamDivision)[change_vec[i]],
-                         kat_kommunikasjon = missing_kat,
-                         kommunikasjon_perc = NA_integer_,
-                         informasjon_perc = NA_integer_,
-                         programmer_perc = NA_integer_,
-                         utstyr_perc = NA_integer_,
-                         total_perc = 0L)
-      df <- rbind(df, impute_vec)
+      for (kat in missing_kat) {
+        df <- rbind(df, list(SamDivision = sam_unique[change_vec[i]],
+                             kat_kommunikasjon = kat,
+                             kommunikasjon_perc = NA_integer_,
+                             informasjon_perc = NA_integer_,
+                             programmer_perc = NA_integer_,
+                             utstyr_perc = NA_integer_,
+                             total_perc = 0L))
+      }
     }
     df_out <- df[order(df$SamDivision, df$kat_kommunikasjon),]
   } else {
     df_out <- df
   }
   return(df_out)
+}
+get_vec_of_changes <- function(var) {
+  out <- table(factor(as.character(var),
+                      levels = unname(attr(var, which = "labels"))))
+  out <- which(unname(sapply(out, function(x) {x < 4})))
+  return(out)
+}
+get_sam_div_unique <- function(sam_div) {
+  num_div <- length(attr(sam_div, which = "labels"))
+  sort(c(unique(sam_div),
+         setdiff(seq_len(num_div), unique(sam_div))))
 }
 generate_data_final <- function(df) {
   num_obs <- nrow(df)
@@ -178,4 +201,5 @@ generate_data_report <- function(df, year) {
   df_out$year <- year
   df_out <- df_out %>%
     dplyr::select("year", dplyr::everything())
+  return(df_out)
 }

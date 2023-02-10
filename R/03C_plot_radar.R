@@ -32,7 +32,7 @@ plot_radar <- function(df, year, col_scm = c(light_blue = "#189BC4",
                                           "Bruk av programmvare",
                                           "Bruk av teknologi")) +
     ggplot2::ylab("") +
-    ggplot2::xlab("") +
+    ggplot2::xlab("Digital Kompetanse") +
     ggplot2::ggtitle(paste0("\u00c5", "r ", year)) +
     ggplot2::coord_flip() +
     ggplot2::theme_void() +

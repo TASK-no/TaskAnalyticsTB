@@ -4,7 +4,7 @@
 #' as percentages of the total.
 #'
 #' @param data_all data set, joined with all years, as produced by
-#'    [get_data_summary_overall()]
+#'    [get_data_joined()]
 #' @param col_scm the col-scheme; default is the task color scheme as hard coded
 #'
 #' @return a ggplot2-object, the summary plot
@@ -34,7 +34,8 @@ plot_overall <- function(data_all, col_scm = c(light_blue = "#189BC4",
     ggplot2::xlab("Digital Kompetanse") +
     ggplot2::theme_void() +
     ggplot2::theme(axis.text = ggplot2::element_text(size = 10),
-                   axis.title = ggplot2::element_text(size = 14))+
+                   axis.title = ggplot2::element_text(size = 14),
+                   legend.title = ggplot2::element_blank())+
     ggplot2::coord_flip()
 }
 #' Binds (rbind()'s) data frames for different years
@@ -45,14 +46,7 @@ plot_overall <- function(data_all, col_scm = c(light_blue = "#189BC4",
 #'
 #' @return \code{rbind}-ed data frames
 #' @export
-get_data_summary_overall <- function(...) {
+get_data_joined <- function(...) {
   data_list <- list(...)
   Reduce(rbind, data_list)
 }
-#' Generates data set for [radar_plot()]
-#'
-#' @param data_set data set, joined with all years, as produced by
-#'    [get_data_summary_overall()]
-#'
-#' @return a data frame, see function body for details
-#' @export

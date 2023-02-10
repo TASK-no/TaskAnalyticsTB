@@ -13,7 +13,7 @@ plot_overall(
 }
 \arguments{
 \item{data_all}{data set, joined with all years, as produced by
-[get_data_summary_overall()]}
+[get_data_joined()]}
 
 \item{col_scm}{the col-scheme; default is the task color scheme as hard coded}
 }
