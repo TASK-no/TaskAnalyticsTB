@@ -29,7 +29,7 @@ plot_pie_figures <- function(data_set, year, return_type = "default",
     title_taken <- grid::textGrob(title_taken,
                                   gp = grid::gpar(fontsize = 25,
                                                   font = 8))
-    p_lst <- generate_pie_plot_def(df)
+    p_lst <- generate_pie_plot_def(df, col_scm = col_scm)
     p_jnd <- gridExtra::grid.arrange(p_lst[[1]], p_lst[[2]],
                                      p_lst[[3]], p_lst[[4]],
                                      nrow = 2, top = title_taken,
@@ -61,7 +61,7 @@ generate_pie_plot_def <- function(data_set,
                                                    "Informasjonssikkerhet og personvern",
                                                    "Bruk av programvare",
                                                    "Bruk av teknologi"),
-                                  col_scheme = "Set1") {
+                                  col_scm = "Set1") {
   stopifnot(length(lo_vars) == length(lo_pos))
   stopifnot(length(lo_pos) == length(lo_labs))
   stopifnot(length(lo_labs) == length(lo_subtitles))
@@ -76,7 +76,7 @@ generate_pie_plot_def <- function(data_set,
                                                       lab = lo_labs[i],
                                                       col = "white",
                                                       size = 4),
-                                 col_palette = col_scheme)
+                                 col_palette = col_scm)
   }
   return(pie_list)
 }
@@ -111,7 +111,7 @@ generate_pie_plot_shy <- function(data_set,
                                          second = list(row = 0, column = 1),
                                          third  = list(row = 1, column = 0),
                                          fourth = list(row = 1, column = 1));
-  col_scheme_pie <- col_scheme[seq_len(num_pies)]
+  col_scheme_pie <- col_scm[seq_len(num_pies)]
   fig <- plotly::plot_ly()
   for (i in seq_len(num_pies)) {
     fig <- local({i <- i;
