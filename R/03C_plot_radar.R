@@ -13,6 +13,7 @@ plot_radar <- function(df, year, col_scm = c(light_blue = "#189BC4",
                                              dark_green = "#356A1A",
                                              black1 = "#1F282D",
                                              black2 = "#263036")) {
+  browser()
   ggplot2::ggplot(df, ggplot2::aes(x = .data$kategorier,
                                    y = .data$value,
                                    fill = .data$kompetanseomrader,

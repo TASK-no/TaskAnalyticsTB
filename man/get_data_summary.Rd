@@ -4,13 +4,17 @@
 \alias{get_data_summary}
 \title{Computes various data summaries from raw data}
 \usage{
-get_data_summary(data_segm, year)
+get_data_summary(data_segm, year, type = "all")
 }
 \arguments{
 \item{data_segm}{a \code{data.frame} or \code{tibble} of segmented data (this
 is typically the raw data set being run through [segmentation_analysis()]}
 
 \item{year}{the year as a numeric variable}
+
+\item{type}{the type of data set to return; if 'all' then a list of all three
+as described in "Value" are returned, otherwise for "report", "divisions",
+or "final", only the corresponding subtype is returned}
 }
 \value{
 a list of three elements: \itemize{
