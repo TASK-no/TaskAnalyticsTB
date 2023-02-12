@@ -1,13 +1,26 @@
 #' Main function to produce the pie figure
 #'
-#' @param df a data.frame as returned as the first element from the output list
-#'   from [get_data_summary()]
+#' @param data_set a \code{data.frame} as returned as the first element from the
+#'   output list from [get_data_summary()] (if set to type = "all") or the
+#'   \code{data.frame} directly if type = 'final'
 #' @param year the year as an integer (2021, 2022, or 2023)
+#' @param return_type a character: either 'default' which generates a
+#'   ggplot2-plot or 'shinyDB' which generates a plotly-type plot for the
+#'   corresponding shiny Dashboard
+#' @param col_scm the col-scheme; default is the task color scheme as hard coded
 #'
-#' @return a "grid arranged" ggplot2 object
+#' @return a "grid arranged" ggplot2 object or a plotly subplot
 #' @export
-plot_pie_figures <- function(df, year, return_type = "default") {
-  df_final_data <- df
+plot_pie_figures <- function(data_set, year, return_type = "default",
+                             col_scm = c(light_blue = "#189BC4",
+                                         dark_blue = "#3F505A",
+                                         orange  = "#F59331",
+                                         light_green = "#54B64E",
+                                         green = "#58B02C",
+                                         dark_green = "#356A1A",
+                                         black1 = "#1F282D",
+                                         black2 = "#263036")) {
+  df_final_data <- data_set
   id_perc <- which(grepl("perc", names(df_final_data)))
   df_final_data[, id_perc] <- lapply(df_final_data[, id_perc],
                                      function(x) {paste0(x, "%")})
@@ -24,7 +37,8 @@ plot_pie_figures <- function(df, year, return_type = "default") {
 
   } else if (return_type == "shinyDB") {
     p_jnd <- generate_pie_plot_shy(data_set = df_final_data,
-                                   title_text = title_taken)
+                                   title_text = title_taken,
+                                   col_scm = col_scm)
   } else {
     stop("Unknown arg. to 'return_type': set to either 'default' or 'shinyDB'.")
   }
@@ -90,14 +104,7 @@ generate_pie_plot_shy <- function(data_set,
                                                    "Bruk av programvare",
                                                    "Bruk av teknologi"),
                                   title_text,
-                                  col_scheme = c(light_blue = "#189BC4",
-                                                 dark_blue = "#3F505A",
-                                                 orange  = "#F59331",
-                                                 light_green = "#54B64E",
-                                                 green = "#58B02C",
-                                                 dark_green = "#356A1A",
-                                                 black1 = "#1F282D",
-                                                 black2 = "#263036")) {
+                                  col_scm) {
   stopifnot(length(lo_vars) == length(lo_subtitles))
   num_pies <- length(lo_vars)
   if (num_pies == 4) layout_pies <- list(first  = list(row = 0, column = 0),
