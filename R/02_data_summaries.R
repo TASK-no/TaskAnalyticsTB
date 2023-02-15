@@ -103,7 +103,6 @@ round_perc <- function(var_to_round, total_sum, digits, add_perc_sign = FALSE) {
   }
 }
 add_missing_kat <- function(df) {
-  # browser()
   change_vec <- get_vec_of_changes(df$SamDivision)
   sam_unique <- get_sam_div_unique(df$SamDivision)
   if (length(change_vec) > 0) {
