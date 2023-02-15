@@ -4,17 +4,26 @@
 \alias{logistic_learn}
 \title{Function wrapper for logit regressions adjusted to the SSV setting.}
 \usage{
-logistic_learn(data_set, model)
+logistic_learn(data_set, model, type = "default")
 }
 \arguments{
 \item{data_set}{the data set; will be passed to get_data_for_prediction
 internally}
 
-\item{model}{a model specification of the form ....}
+\item{model}{a model specification as a list containing named elements of
+  the form
+\itemize{
+  \item 'dependent': the name of the dependet variable as a character string
+  \item 'regressors': a character vector of regressor names
+  \item 'experience': a two element vector giving the dependent
+  variable levels (values coded to zero and one) that are being compared
+ }}
 }
 \value{
-output as generated via \link[stats]{glm} but flavoured with some
-  nicer printing structure and addtional information
+output as generated via \link[stats]{glm} but flavored with some
+  nicer printing structure and additional information; in the
+  \code{type = "default"} version a list of three elements, in the shiny
+  version a list of two
 }
 \description{
 The wrapper is araound \link[stats]{glm} and a suitable expression to be

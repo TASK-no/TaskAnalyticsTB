@@ -4,7 +4,7 @@
 \alias{get_data_for_prediction}
 \title{Transforms data set into a format suitable for logit regressions.}
 \usage{
-get_data_for_prediction(data_set, dependent, regressors, experience_levels)
+get_data_for_prediction(data_set, dependent, regressors, experience)
 }
 \arguments{
 \item{data_set}{a data set as \code{data.frame} or \code{tibble}}
@@ -13,7 +13,7 @@ get_data_for_prediction(data_set, dependent, regressors, experience_levels)
 
 \item{regressors}{the names of the regressor variables as a character vector}
 
-\item{experience_levels}{the experience levels as a two-dimensional character
+\item{experience}{the experience levels as a two-dimensional character
 vector with values of either
 \itemize{
   \item Uerfaren
@@ -28,15 +28,16 @@ a data set (as a \code{data.frame}) shortened and thus suitable for
   and regressors only
 }
 \description{
-The transformation on the input data set \code{data_set} are:
+The transformation on the input \code{data_set} are:
   \itemize{
     \item compute a short data set that only has dependent and regressor vars
-    \item transform these vars into \code{factor}
-    \item recode, if the variable is used, the \code{leder_c} into "Nei"/"Ja"
+    \item transform these vars into \code{factor}s
+    \item re-code, the \code{leder_c} into "Nei"/"Ja", if the variable is
+    used
     \item reduce short data set to a comparison between experience levels
-      (which is 0/1) as defined via argument \code{experience_levels}; e.g.
-      if \code{experience_levels = c("Uerfaren", "Avansert")} then
-      'Uerfaren'=0 and 'Avansert'=1 which are then the possible realizations
-      of the dependent variable
+    (which is 0/1) as defined via argument \code{experience}; e.g. if
+    \code{experience = c("Uerfaren", "Avansert")} then 'Uerfaren'=0
+    and 'Avansert'=1 which are then the possible realizations of the
+    dependent variable
   }
 }

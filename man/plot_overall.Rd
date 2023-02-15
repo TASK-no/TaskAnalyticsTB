@@ -6,7 +6,7 @@
 \usage{
 plot_overall(
   data_all,
-  type = "default",
+  return_type = "default",
   col_scm = c(light_blue = "#189BC4", dark_blue = "#3F505A", orange = "#F59331",
     light_green = "#54B64E", green = "#58B02C", dark_green = "#356A1A", black1 =
     "#1F282D", black2 = "#263036")
@@ -16,13 +16,14 @@ plot_overall(
 \item{data_all}{data set, joined with all years, as produced by
 [get_data_joined()]}
 
-\item{type}{a character: either 'default' which generates a ggplot2-plot or
-'shinyDB' which generates a plotly-type plot for the corresponding shiny Dashboard}
+\item{return_type}{a character: either 'default' which generates a
+ggplot2-plot or 'shinyDB' which generates a plotly-type plot for the
+corresponding shiny Dashboard}
 
 \item{col_scm}{the col-scheme; default is the task color scheme as hard coded}
 }
 \value{
-a ggplot2-object, the summary plot
+a ggplot2- or plotly-object, the summary plot
 }
 \description{
 Horizontal bars showing, per year, the different levels of digital expertise
