@@ -13,7 +13,7 @@ internally}
 \item{model}{a model specification as a list containing named elements of
   the form
 \itemize{
-  \item 'dependent': the name of the dependet variable as a character string
+  \item 'dependent': the name of the dependent variable as a character string
   \item 'regressors': a character vector of regressor names
   \item 'experience': a two element vector giving the dependent
   variable levels (values coded to zero and one) that are being compared

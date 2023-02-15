@@ -88,9 +88,9 @@ recode_q16 <- function(data_set,
   # Total categorical variable for Q16
   data_out <- data_out %>%
     add_overall_kat( name_kat = "kat_kommunikasjon",
-                    names_segmentation_vars = c("grunn_kom",
-                                                "videre_kom",
-                                                "avan_kom"))
+                     names_segmentation_vars = c("grunn_kom",
+                                                 "videre_kom",
+                                                 "avan_kom"))
   data_out <- data_out %>% dplyr::select(tidyselect::all_of(testvec),
                                          kom1, kom2, kom3, kom4, kom5,
                                          kom6, kom7, kom8, kom9, kom10, kom11,
@@ -355,12 +355,123 @@ recode_q19 <- function(data_set,
                                          avan_utstyr, kat_utstyr1)
   return(data_out)
 }
-recode_qXX_rVals <- function(data_set, q_names, from = 5, to = 1) {
+#' Re-codes value of a variable (withlevels) into another value
+#'
+#' The variable types are of
+#' \code{class(var_type) -> 'haven_labelled', 'vctrs_vctr', 'double'} and
+#' \code{typeof(var_type) -> double} and can be e.g. \code{Q16r1-Q16r11,
+#' Q17r1-Q17r10, Q14r1-Q14r8, Q19r1-Q19r11, Q36, Q37, Q38} etc. The level e.g.
+#' 5 (which corresponds to "Vet ikke" i.e. "Do not know") is often re-coded to
+#' 1 (which corresponds to "Ikke i det hele tatt" or similar, which corresponds
+#' to some form of "no"/'not at all").
+#'
+#' @param data_set the data set containing the variable to re_code
+#' @param q_names character giving the name of the variable to re-code
+#' @param from the value to be changed
+#' @param to the new value to be assigned (instead of the one passed via
+#'    \code{from})
+#' @param na_replacement value to replace \code{NA} values with; defaults to
+#'   \code{NULL} but must be set to a numeric value is \code{NA}'s are present,
+#'   otherwise there will be an error
+#' @param SETTINGS_FACT a (named!) list with the following logical values:
+#' \itemize{
+#'   \item{\code{ADJUST_LABELS:}}{logical; if \code{TRUE} then
+#'   code{class(var_type) -> 'haven_labelled', 'vctrs_vctr', 'double'} labels
+#'   are adjusted i.e the \code{from}'th label is removed}
+#'   \item{\code{AS_FACTOR:}}{logical; if \code{TRUE}, then conversion to a
+#'   factor is performed}
+#'   \item{\code{ORDERED:}}{logical; if \code{TRUE} (and if \code{AS_FACTOR =
+#'   TRUE}), then the factor will be ordered}
+#'   \item{LABELS}{logical; if \code{TRUE} (and if \code{AS_FACTOR =
+#'   TRUE}), then factor labels are set}
+#' }
+#'
+#' @return the same data set but with the re-coded variable(s)
+#' @export
+recode_qXX_rVals <- function(data_set, q_names, from = 5, to = 1,
+                             na_replacement = NULL,
+                             SETTINGS_FACT = list(ADJUST_LABELS = FALSE,
+                                                  AS_FACTOR = FALSE,
+                                                  ORDERED = FALSE,
+                                                  LABELS = FALSE)) {
+  num_from <- length(from)
+  num_to   <- length(to)
+  stopifnot(num_from == num_to)
   data_out <- data_set
   for (i in q_names) {
-    data_set[[i]][data_set[[i]] == from] <- to
+    if (any(is.na(data_out[[i]]))) {
+      if (!is.null(na_replacement)) {
+        data_out[[i]][which(is.na(data_out[[i]]))] <- na_replacement
+      } else {
+        stop("Variable contains NA-values but replacement is set to 'NULL'.")
+      }
+    }
+    for (j in 1:num_from) {
+      data_out[[i]][data_out[[i]] == from[j]] <- to[j]
+    }
+    data_out[[i]] <- get_factor_adjusted(data_out[[i]], SETTINGS_FACT)
   }
-  return(data_set)
+  return(data_out)
+}
+get_factor_adjusted <- function(x, sttgs) {
+  stopifnot(all(sapply(sttgs, is.logical)))
+  if (sttgs$ADJUST_LABELS) {
+    lvl1    <- unname(attr(x, which = "labels"))
+    tmp_fac <- factor(x)
+    lvl2    <- as.numeric(levels(tmp_fac))
+
+    remove_lvl_ids <- setdiff(lvl1, lvl2)
+
+    attr(x, which = "labels") <- attr(x, which = "labels")[-remove_lvl_ids]
+  }
+  if (!sttgs$AS_FACTOR) return(x)
+  if (sttgs$LABELS) {
+    tmp_labels <- attr(x, which = "labels")
+    tmp_levels <- unname(tmp_labels)
+    tmp_labels <- names(tmp_labels)
+    return(factor(x, ordered = sttgs$ORDERED,
+                  levels = tmp_levels,
+                  labels = tmp_labels))
+  } else {
+    return(factor(x, ordered = sttgs$ORDERED))
+  }
+}
+#' Re-codes a set of value of a have-factor variable (with levels)
+#'
+#' The variable types permitted are of \code{class(var_type) ->
+#' 'haven_labelled', 'vctrs_vctr', 'double'} and \code{typeof(var_type) ->
+#' double} and can be e.g. \code{Q16r1-Q16r11, Q17r1-Q17r10, Q14r1-Q14r8,
+#' Q19r1-Q19r11, Q36, Q37, Q38} etc. The levels e.g. 5 (which corresponds to
+#' "Vet ikke" i.e. "Do not know") and 1 (which corresponds to "Ikke i det hele
+#' tatt" or similar, which means some form of "no"/'not at all") are often made
+#' zero, whereas higher values like 2,3 and 4 are then mapped to 1. So this
+#' functions creates a categorical or indicator variable
+#'
+#' @inheritParams recode_qXX_rVals
+#' @param list_recodes a list of elements of \code{dynamic_dots}-type that will
+#'   be passed down to [dplyr::recode_factor()] and gives the from/to value
+#'   re-coding as required by this function
+#' @param new_names character vector with same lengths as \code{q_names} and
+#'   \code{list_recodes} giving the new variable names of the resulting
+#'   indicators
+#'
+#' @return the same data set but with the re-coded variable(s)
+#' @export
+recode_qXX_cats <- function(data_set, q_names,
+                            list_recodes,
+                            new_names,
+                            SETTINGS_FACT) {
+  stopifnot(length(q_names) == length(list_recodes))
+  stopifnot(length(q_names) == length(new_names))
+  data_out <- data_set
+  for (i in seq_along(q_names)) {
+    tmp_factor <- get_factor_adjusted(data_out[[q_names[i]]], SETTINGS_FACT)
+    tmp_factor <- tmp_factor %>%
+      dplyr::recode_factor(!!!list_recodes[[i]],
+                           .ordered = SETTINGS_FACT$ORDERED)
+    data_out[[new_names[i]]] <- tmp_factor
+  }
+  return(data_out)
 }
 generate_segmentation_variable <- function(data_set,
                                            from_vals,
