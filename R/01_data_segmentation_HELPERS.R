@@ -376,13 +376,14 @@ recode_q19 <- function(data_set,
 #' @param SETTINGS_FACT a (named!) list with the following logical values:
 #' \itemize{
 #'   \item{\code{ADJUST_LABELS:}}{logical; if \code{TRUE} then
-#'   code{class(var_type) -> 'haven_labelled', 'vctrs_vctr', 'double'} labels
-#'   are adjusted i.e the \code{from}'th label is removed}
+#'   \code{class(var_type) -> 'haven_labelled', 'vctrs_vctr', 'double'} labels
+#'   are adjusted to the length of actual levels of the variable after
+#'   re-coding took place}
 #'   \item{\code{AS_FACTOR:}}{logical; if \code{TRUE}, then conversion to a
 #'   factor is performed}
 #'   \item{\code{ORDERED:}}{logical; if \code{TRUE} (and if \code{AS_FACTOR =
 #'   TRUE}), then the factor will be ordered}
-#'   \item{LABELS}{logical; if \code{TRUE} (and if \code{AS_FACTOR =
+#'   \item{ADD_LABELS}{logical; if \code{TRUE} (and if \code{AS_FACTOR =
 #'   TRUE}), then factor labels are set}
 #' }
 #'
@@ -393,7 +394,7 @@ recode_qXX_rVals <- function(data_set, q_names, from = 5, to = 1,
                              SETTINGS_FACT = list(ADJUST_LABELS = FALSE,
                                                   AS_FACTOR = FALSE,
                                                   ORDERED = FALSE,
-                                                  LABELS = FALSE)) {
+                                                  ADD_LABELS = FALSE)) {
   num_from <- length(from)
   num_to   <- length(to)
   stopifnot(num_from == num_to)
@@ -416,25 +417,44 @@ recode_qXX_rVals <- function(data_set, q_names, from = 5, to = 1,
 get_factor_adjusted <- function(x, sttgs) {
   stopifnot(all(sapply(sttgs, is.logical)))
   if (sttgs$ADJUST_LABELS) {
-    lvl1    <- unname(attr(x, which = "labels"))
-    tmp_fac <- factor(x)
-    lvl2    <- as.numeric(levels(tmp_fac))
-
-    remove_lvl_ids <- setdiff(lvl1, lvl2)
-
-    attr(x, which = "labels") <- attr(x, which = "labels")[-remove_lvl_ids]
+    x <- get_adjusted_labels(x)
   }
   if (!sttgs$AS_FACTOR) return(x)
-  if (sttgs$LABELS) {
+  if (sttgs$ADD_LABELS) {
     tmp_labels <- attr(x, which = "labels")
-    tmp_levels <- unname(tmp_labels)
-    tmp_labels <- names(tmp_labels)
-    return(factor(x, ordered = sttgs$ORDERED,
-                  levels = tmp_levels,
-                  labels = tmp_labels))
+    if (!is.null(tmp_labels)) {
+      tmp_levels <- unname(tmp_labels)
+      tmp_labels <- names(tmp_labels)
+      return(factor(x, ordered = sttgs$ORDERED,
+                    levels = tmp_levels,
+                    labels = tmp_labels))
+    } else {
+      return(factor(x, ordered = sttgs$ORDERED))
+    }
   } else {
     return(factor(x, ordered = sttgs$ORDERED))
   }
+}
+get_adjusted_labels <- function(x) {
+  lvl1    <- unname(attr(x, which = "labels"))
+  if (!is.null(lvl1)) { # This is the case when x is a haven-labelled factor
+    tmp_fac <- factor(x)
+    lvl2    <- as.numeric(levels(tmp_fac))
+    remove_lvl_ids <- setdiff(lvl1, lvl2)
+    attr(x, which = "labels") <- attr(x, which = "labels")[-remove_lvl_ids]
+  } else if (is.null(lvl1)) { # This is the case when x is a standard factor
+    if (!is.null(attr(x, which = "labels"))) {
+      lvl1 <- attr(x, which = "levels")
+      lvl2 <- attr(droplevels(factor(x)), which = "levels")
+      remove_lvl_ids <- setdiff(lvl1, lvl2)
+      if (!length(remove_lvl_ids)) {
+        attr(x, which = "labels") <- attr(x, which = "labels")[-remove_lvl_ids]
+      }
+    }
+  } else if (is.null(lvl1)) {
+    stop("Something wrong with input vars/labels/levels.")
+  }
+  return(x)
 }
 #' Re-codes a set of value of a have-factor variable (with levels)
 #'

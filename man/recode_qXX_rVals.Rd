@@ -10,8 +10,8 @@ recode_qXX_rVals(
   from = 5,
   to = 1,
   na_replacement = NULL,
-  SETTINGS_FACT = list(ADJUST_LABELS = FALSE, AS_FACTOR = FALSE, ORDERED = FALSE, LABELS
-    = FALSE)
+  SETTINGS_FACT = list(ADJUST_LABELS = FALSE, AS_FACTOR = FALSE, ORDERED = FALSE,
+    ADD_LABELS = FALSE)
 )
 }
 \arguments{
@@ -31,13 +31,14 @@ otherwise there will be an error}
 \item{SETTINGS_FACT}{a (named!) list with the following logical values:
 \itemize{
   \item{\code{ADJUST_LABELS:}}{logical; if \code{TRUE} then
-  code{class(var_type) -> 'haven_labelled', 'vctrs_vctr', 'double'} labels
-  are adjusted i.e the \code{from}'th label is removed}
+  \code{class(var_type) -> 'haven_labelled', 'vctrs_vctr', 'double'} labels
+  are adjusted to the length of actual levels of the variable after
+  re-coding took place}
   \item{\code{AS_FACTOR:}}{logical; if \code{TRUE}, then conversion to a
   factor is performed}
   \item{\code{ORDERED:}}{logical; if \code{TRUE} (and if \code{AS_FACTOR =
   TRUE}), then the factor will be ordered}
-  \item{LABELS}{logical; if \code{TRUE} (and if \code{AS_FACTOR =
+  \item{ADD_LABELS}{logical; if \code{TRUE} (and if \code{AS_FACTOR =
   TRUE}), then factor labels are set}
 }}
 }
