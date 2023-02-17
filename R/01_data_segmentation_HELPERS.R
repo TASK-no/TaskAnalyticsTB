@@ -441,13 +441,15 @@ get_adjusted_labels <- function(x) {
     tmp_fac <- factor(x)
     lvl2    <- as.numeric(levels(tmp_fac))
     remove_lvl_ids <- setdiff(lvl1, lvl2)
-    attr(x, which = "labels") <- attr(x, which = "labels")[-remove_lvl_ids]
+    if (length(remove_lvl_ids) > 0) {
+      attr(x, which = "labels") <- attr(x, which = "labels")[-remove_lvl_ids]
+    }
   } else if (is.null(lvl1)) { # This is the case when x is a standard factor
     if (!is.null(attr(x, which = "labels"))) {
       lvl1 <- attr(x, which = "levels")
       lvl2 <- attr(droplevels(factor(x)), which = "levels")
       remove_lvl_ids <- setdiff(lvl1, lvl2)
-      if (!length(remove_lvl_ids)) {
+      if (length(remove_lvl_ids) > 0) {
         attr(x, which = "labels") <- attr(x, which = "labels")[-remove_lvl_ids]
       }
     }
