@@ -72,7 +72,8 @@ get_data_for_prediction <- function(data_set,
 #'   \code{type = "default"} version a list of three elements, in the shiny
 #'   version a list of two
 #' @export
-logistic_learn <- function(data_set, model, type = "default") {
+logistic_learn <- function(data_set = NULL, model = NULL, type = "default") {
+  if (is.null(data_set) || is.null(model)) {return(NULL);}
   if (type == "default") {
     out <- logistic_learn_def(data_set, model)
   } else if (type == "shinyDB") {
