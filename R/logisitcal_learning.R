@@ -79,7 +79,9 @@ logistic_learn <- function(data_set = NULL, model = NULL, type = "default") {
   } else if (type == "shinyDB") {
     out <- logistic_learn_shy(data_set, model)
     out <- list(model_summary = out$summary_logistic_model,
-                odds_info = out$summary_odds)
+                odds_info = out$summary_odds,
+                fail_conv = out$summary_converged,
+                fail_num = out$summary_numerical)
   } else {
     stop("Unknown argument value for argument 'type'.")
   }
@@ -139,18 +141,48 @@ logistic_learn_def <- function(data_set, model) {
   return(output)
 }
 logistic_learn_shy <- function(data_set, model) {
+  logistic_out_sum <- NULL
+  logistic_out_odd <- NULL
+  logistic_out_cnv <- NULL
+  logistic_out_num <- NULL
+
   model_formula <- parse_model_to_formula(model)
   data_short    <- get_data_for_prediction(data_set,
                                            model$dependent,
                                            model$regressors,
                                            model$experience)
-  logistic_out <- stats::glm(model_formula,
-                             data = data_short,
-                             family = stats::binomial(link = "logit"))
-  logistic_out_sum <- summary(logistic_out)
-  logistic_out_odd <- exp(logistic_out_sum$coefficients[, 1, drop = FALSE])
+  check_match <- check_forumula_data_match(data_short, model_formula)
+
+  if (isTRUE(check_match)) {
+    logistic_out <- tryCatch(stats::glm(model_formula,
+                                        data = data_short,
+                                        family = stats::binomial(link = "logit")),
+                             warning = function(w) {
+                               return(
+                                 list(
+                                   out = stats::glm(model_formula,
+                                                    data = data_short,
+                                                    family = stats::binomial(link = "logit")),
+                                   mywarn = w))
+                             })
+    if (names(logistic_out)[2] == "mywarn") {
+      logistic_out_cnv <- grepl("converge", logistic_out[[2]][[1]])
+      logistic_out_num <- grepl("numerically", logistic_out[[2]][[1]])
+      logistic_out_sum <- summary(logistic_out[[1]])
+    } else {
+      logistic_out_sum <- summary(logistic_out)
+    }
+    logistic_out_odd <- exp(logistic_out_sum$coefficients[, 1, drop = FALSE])
+  } else if(isFALSE(check_match)) {
+    msg <- paste0("Datasett for det", paste0("\u00e5" ,"r"),
+                  "et har ikke de spesifiserte regressorene!")
+    logistic_out_sum <- msg
+    logistic_out_odd <- msg
+  }
   return(list(summary_logistic_model = logistic_out_sum,
-              summary_odds = logistic_out_odd))
+              summary_odds = logistic_out_odd,
+              summary_converged = logistic_out_cnv,
+              summary_numerical = logistic_out_num))
 }
 parse_model_to_formula <- function(model) {
   dependent           <- model$dependent
@@ -167,4 +199,10 @@ get_regs <- function(regs) {
 }
 get_model_forumula_char <- function(dep, regs) {
   paste(dep, regs, sep = "~")
+}
+check_forumula_data_match <- function(data_set, formula_taken) {
+  col_to_check <- colnames(data_set)[-1]
+  formula_to_check <- gsub(" ", "", strsplit(as.character(formula_taken[3]),
+                                             "\\+")[[1]])
+  setequal(col_to_check, formula_to_check)
 }
