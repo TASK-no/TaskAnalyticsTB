@@ -61,10 +61,11 @@ plot_radar_def <- function(df, year, col_scm) {
                                                       size = 20))
 }
 plot_radar_shy <- function(df, year, col_scm) {
-  col_scm_used <- unname(col_scm[c("dark_green",
-                                   "black2",
-                                   "black1",
-                                   "green")])
+  col_scm_used <- unname(col_scm[1:4])
+  # col_scm_used <- unname(col_scm[c("dark_green",
+  #                                  "black2",
+  #                                  "black1",
+  #                                  "green")])
   data_use <- df %>% dplyr::mutate(value = value * 100)
   fig <- plotly::plot_ly(data = data_use)
   fig <- fig %>%
