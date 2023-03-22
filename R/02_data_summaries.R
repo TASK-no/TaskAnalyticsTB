@@ -33,45 +33,76 @@ get_data_summary <- function(data_segm, year, type = "all") {
                 df_final_divisions = df_final_divisions))
   } else if (type == "final") {
     generate_data_final(data_sub[-1])
-  } else if (type == "divisions") {
-    generate_data_final(generate_data_division(data_sub)[-1])
+  } else if (type == "divisions_area") {
+    browser()
+    generate_data_division(data_sub, "area_distribution")
+  } else if (type == "divisions_competence") {
+    browser()
+    generate_data_division(data_sub, "competence_distribution")
   } else if (type == "report") {
     df_final_data <- generate_data_final(data_sub[-1])
     generate_data_report(df_final_data, year)
   }
 }
-generate_data_division <- function(df) {
+generate_data_division <- function(df, type = "area_distribution") {
+  if (type == "area_distribution") {
+    df_div_out <- generate_data_division_area_distribution(df)
+  } else if (type == "competence_distribution") {
+    df_div_out <- generate_data_division_area_distribution(df)
+  }
+}
+generate_data_division_competence_distribution <- function() {
+
+}
+generate_data_division_area_distribution <- function(df) {
   nam_div <- names(attr(df$SamDivision, "labels"))
+
   df_div_out <- df %>% dplyr::group_by(.data$SamDivision,
                                        .data$kat_kommunikasjon) %>%
-    dplyr::summarise(kommunikasjon_perc = dplyr::n())
+    dplyr::summarise(kommunikasjon_tot_num = dplyr::n())
   df_div_out <- dplyr::full_join(df_div_out,
                                  df %>%
                                    dplyr::group_by(.data$SamDivision,
                                                    .data$kat_informasjon1) %>%
-                                   dplyr::summarise(informasjon_perc = dplyr::n()),
+                                   dplyr::summarise(informasjon_tot_num = dplyr::n()),
                                  by = c("SamDivision", "kat_kommunikasjon" = "kat_informasjon1"))
   df_div_out <- dplyr::full_join(df_div_out,
                                  df %>% dplyr::group_by(.data$SamDivision,
                                                         .data$kat_programmer1) %>%
-                                   dplyr::summarise(programmer_perc = dplyr::n()),
+                                   dplyr::summarise(programmer_tot_num = dplyr::n()),
                                  by = c("SamDivision", "kat_kommunikasjon" = "kat_programmer1"))
   df_div_out <- dplyr::full_join(df_div_out,
                                  df %>% dplyr::group_by(.data$SamDivision,
                                                         .data$kat_utstyr1) %>%
-                                   dplyr::summarise(utstyr_perc = dplyr::n()),
+                                   dplyr::summarise(utstyr_tot_num = dplyr::n()),
                                  by = c("SamDivision", "kat_kommunikasjon" = "kat_utstyr1"))
+
   df_div_out <- df_div_out %>%
-    generate_total_perc_var() %>%
-    add_missing_kat() %>%
-    calculate_per_vars("kommunikasjon_perc") %>%
-    calculate_per_vars("informasjon_perc") %>%
-    calculate_per_vars("programmer_perc") %>%
-    calculate_per_vars("utstyr_perc") %>%
-    calculate_per_vars("total_perc")
+    add_missing_kat()
 
   df_div_out$SamDivision <- factor(df_div_out$SamDivision, labels = nam_div)
-  return(dplyr::ungroup(df_div_out))
+  names(df_div_out)[2] <- "category"
+
+  df_div_out$SamDivision <- match_list_sam_division(df_div_out$SamDivision,
+                                                    df_div_out$category)
+
+  df_div_out <- df_div_out %>%
+    dplyr::rowwise() %>% dplyr::mutate(all_total = sum(.data$kommunikasjon_tot_num,
+                                                       .data$informasjon_tot_num,
+                                                       .data$programmer_tot_num,
+                                                       .data$utstyr_tot_num, na.rm = TRUE))
+  df_div_out <- df_div_out %>%
+    dplyr::group_by(SamDivision, category) %>%
+    tidyr::pivot_longer(cols = tidyselect::ends_with("_num"),
+                        names_to = "sub_category",
+                        values_to = "total_num") %>%
+    dplyr::mutate(perc = round(total_num / all_total * 100, digits = 2)) %>%
+    dplyr::select(.data$sub_category, .data$total_num, .data$perc) %>%
+    dplyr::ungroup()
+  return(df_div_out)
+}
+match_list_sam_division <- function(division) {
+  substr(division, 1, 1)
 }
 generate_total_perc_var <- function(df) {
   df_div_out <- df %>%
@@ -82,7 +113,7 @@ generate_total_perc_var <- function(df) {
                                    .data$utstyr_perc, na.rm = TRUE))
 
   df_div_out <- df_div_out[order(df_div_out$SamDivision,
-                                 df_div_out$kat_kommunikasjon),]
+                                 df_div_out$digital_competence),]
   return(dplyr::ungroup(df_div_out))
 }
 calculate_per_vars <- function(df, name_var) {
