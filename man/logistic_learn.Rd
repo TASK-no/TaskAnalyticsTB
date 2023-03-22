@@ -4,7 +4,7 @@
 \alias{logistic_learn}
 \title{Function wrapper for logit regressions adjusted to the SSV setting.}
 \usage{
-logistic_learn(data_set, model, type = "default")
+logistic_learn(data_set = NULL, model = NULL, type = "default")
 }
 \arguments{
 \item{data_set}{the data set; will be passed to get_data_for_prediction
