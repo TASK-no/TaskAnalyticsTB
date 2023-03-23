@@ -35,74 +35,146 @@ get_data_summary <- function(data_segm, year, type = "all") {
     generate_data_final(data_sub[-1])
   } else if (type == "divisions_area") {
     browser()
-    generate_data_division(data_sub, "area_distribution")
+    generate_data_division(data_sub, "divisions_area")
   } else if (type == "divisions_competence") {
     browser()
-    generate_data_division(data_sub, "competence_distribution")
+    generate_data_division(data_sub, "divisions_competence")
   } else if (type == "report") {
     df_final_data <- generate_data_final(data_sub[-1])
     generate_data_report(df_final_data, year)
   }
 }
-generate_data_division <- function(df, type = "area_distribution") {
-  if (type == "area_distribution") {
-    df_div_out <- generate_data_division_area_distribution(df)
-  } else if (type == "competence_distribution") {
-    df_div_out <- generate_data_division_area_distribution(df)
+generate_data_division <- function(df, type = "divisions_area") {
+  if (type == "divisions_area") {
+    df_div_out <- df %>%
+      generate_data_division_prelim() %>%
+      generate_data_division_area()
+    col_select <-  tidyselect::all_of(c("kommunikasjon", "informasjon",
+                                        "programmer", "utstyr"))
+  } else if (type == "divisions_competence") {
+    browser()
+    df_div_out <- df %>%
+      generate_data_division_prelim() %>%
+      generate_data_division_competence()
+    col_select <- tidyselect::all_of(c("Uerfaren", "Grunnleggende",
+                                       "Videregående", "Avansert"))
   }
+  df_div_out <- df_div_out %>%
+    dplyr::group_by(.data$SamDivision, .data$category) %>%
+    tidyr::pivot_longer(cols = col_select,
+                        names_to = "sub_category",
+                        values_to = "total_num") %>%
+    dplyr::mutate(perc = round(.data$total_num / .data$all_total * 100,
+                               digits = 2)) %>%
+    dplyr::select(.data$sub_category, .data$total_num, .data$perc) %>%
+    dplyr::ungroup()
+  if (type == "divisions_area") {
+    df_div_out$category <- match_list_category(df_div_out$category,
+                                               "competence")
+    df_div_out$sub_category <- match_list_category(df_div_out$sub_category,
+                                                   "area")
+  } else if (type == "divisions_competence") {
+    df_div_out$category <- match_list_category(df_div_out$category,
+                                               "area")
+    df_div_out$sub_category <- match_list_category(df_div_out$sub_category,
+                                                   "competence")
+  }
+  return(df_div_out)
 }
-generate_data_division_competence_distribution <- function() {
+generate_data_division_prelim <- function(df) {
+  df_div_out <- df
+  df_div_out <- df_div_out %>%
+    dplyr::group_by(.data$SamDivision,
+                    .data$kat_kommunikasjon) %>%
+    dplyr::summarise(kommunikasjon = dplyr::n())
+  names(df_div_out)[2] <- "category"
 
-}
-generate_data_division_area_distribution <- function(df) {
-  nam_div <- names(attr(df$SamDivision, "labels"))
-
-  df_div_out <- df %>% dplyr::group_by(.data$SamDivision,
-                                       .data$kat_kommunikasjon) %>%
-    dplyr::summarise(kommunikasjon_tot_num = dplyr::n())
   df_div_out <- dplyr::full_join(df_div_out,
                                  df %>%
                                    dplyr::group_by(.data$SamDivision,
                                                    .data$kat_informasjon1) %>%
-                                   dplyr::summarise(informasjon_tot_num = dplyr::n()),
-                                 by = c("SamDivision", "kat_kommunikasjon" = "kat_informasjon1"))
+                                   dplyr::summarise(informasjon = dplyr::n()),
+                                 by = c("SamDivision",
+                                        "category" = "kat_informasjon1"))
   df_div_out <- dplyr::full_join(df_div_out,
                                  df %>% dplyr::group_by(.data$SamDivision,
                                                         .data$kat_programmer1) %>%
-                                   dplyr::summarise(programmer_tot_num = dplyr::n()),
-                                 by = c("SamDivision", "kat_kommunikasjon" = "kat_programmer1"))
+                                   dplyr::summarise(programmer = dplyr::n()),
+                                 by = c("SamDivision",
+                                        "category" = "kat_programmer1"))
   df_div_out <- dplyr::full_join(df_div_out,
                                  df %>% dplyr::group_by(.data$SamDivision,
                                                         .data$kat_utstyr1) %>%
-                                   dplyr::summarise(utstyr_tot_num = dplyr::n()),
-                                 by = c("SamDivision", "kat_kommunikasjon" = "kat_utstyr1"))
+                                   dplyr::summarise(utstyr = dplyr::n()),
+                                 by = c("SamDivision",
+                                        "category" = "kat_utstyr1"))
 
   df_div_out <- df_div_out %>%
     add_missing_kat()
 
+  nam_div <- names(attr(df$SamDivision, "labels"))
   df_div_out$SamDivision <- factor(df_div_out$SamDivision, labels = nam_div)
-  names(df_div_out)[2] <- "category"
-
-  df_div_out$SamDivision <- match_list_sam_division(df_div_out$SamDivision,
-                                                    df_div_out$category)
+  df_div_out$SamDivision <- match_list_sam_division(df_div_out$SamDivision)
+  return(df_div_out)
+}
+generate_data_division_competence <- function(df) {
+  browser()
+  df_div_out <- df
+  names(df_div_out)[2] <- "sub_category"
+  df_div_out <- df_div_out %>%
+    tidyr::pivot_longer(cols = tidyselect::all_of(c("kommunikasjon",
+                                                    "informasjon",
+                                                    "programmer",
+                                                    "utstyr")),
+                        names_to = "category",
+                        values_to = "all_total")
+  df_div_out <- df_div_out %>%
+    tidyr::pivot_wider(names_from = "sub_category",
+                       values_from = "all_total")
 
   df_div_out <- df_div_out %>%
-    dplyr::rowwise() %>% dplyr::mutate(all_total = sum(.data$kommunikasjon_tot_num,
-                                                       .data$informasjon_tot_num,
-                                                       .data$programmer_tot_num,
-                                                       .data$utstyr_tot_num, na.rm = TRUE))
-  df_div_out <- df_div_out %>%
-    dplyr::group_by(SamDivision, category) %>%
-    tidyr::pivot_longer(cols = tidyselect::ends_with("_num"),
-                        names_to = "sub_category",
-                        values_to = "total_num") %>%
-    dplyr::mutate(perc = round(total_num / all_total * 100, digits = 2)) %>%
-    dplyr::select(.data$sub_category, .data$total_num, .data$perc) %>%
-    dplyr::ungroup()
+    dplyr::rowwise() %>% dplyr::mutate(all_total = sum(.data$Uerfaren,
+                                                       .data$Grunnleggende,
+                                                       .data$Videregående,
+                                                       .data$Avansert,
+                                                       na.rm = TRUE))
+  return(df_div_out)
+}
+generate_data_division_area <- function(df) {
+  df_div_out <- df %>%
+    dplyr::rowwise() %>% dplyr::mutate(all_total = sum(.data$kommunikasjon,
+                                                       .data$informasjon,
+                                                       .data$programmer,
+                                                       .data$utstyr,
+                                                       na.rm = TRUE))
   return(df_div_out)
 }
 match_list_sam_division <- function(division) {
-  substr(division, 1, 1)
+  div_new <- c(`A - Trafikant og kjøretøy` = "A - Trafikant",
+               `B - Utbygging` = "B - Utbygging",
+               `C - Drift og vedlikehold` = "C - Vedlikehold",
+               `D - Transport og samfunn` = "D - Transport",
+               `E - IT` = "E - IT",
+               `F - Fellesfunksjoner` = "F - Fellesfunksjoner",
+               `K - HR og HMS/Internrevisjonen/Kommunikasjon/Økonomi` = "K - HR/Økonomi",
+               `L - Myndighet og regelverk` = "L - Myndighet/regelverk")
+  unname(div_new[division])
+}
+match_list_category <- function(cat, cat_type = "area") {
+  if (cat_type == "area") {
+    cat_new <- c(`kommunikasjon` = "Kommunikasjon og samhandling",
+                 `informasjon` = "Informasjonssikkerhet og personvern",
+                 `programmer` = "Bruk av programvare",
+                 `utstyr` = "Bruk av teknologi")
+  } else if (cat_type == "competence") {
+    cat_new <- c(`Uerfaren` = "Uerfaren",
+                 `Grunnleggende` = "Grunnleggende",
+                 `Videregående` = "Videregående",
+                 `Avansert` = "Avansert")
+  } else {
+    stop("Unknown value for 'cat_type': set to either 'area' or 'comptenece'.")
+  }
+  unname(cat_new[cat])
 }
 generate_total_perc_var <- function(df) {
   df_div_out <- df %>%
