@@ -42,7 +42,7 @@ plot_division_shy <- function(df, year, title, y_title, col_scm) {
                    title = list(text = title),
                    yaxis = list(title = list(text = y_title,
                                              standoff = 7,
-                                             font = list(size = 14))),
+                                             font = list(size = 20))),
                    xaxis = list(title = list(text = "")),
                    barmode = "stack")
 }
