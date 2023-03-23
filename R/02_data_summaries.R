@@ -34,10 +34,8 @@ get_data_summary <- function(data_segm, year, type = "all") {
   } else if (type == "final") {
     generate_data_final(data_sub[-1])
   } else if (type == "divisions_area") {
-    browser()
     generate_data_division(data_sub, "divisions_area")
   } else if (type == "divisions_competence") {
-    browser()
     generate_data_division(data_sub, "divisions_competence")
   } else if (type == "report") {
     df_final_data <- generate_data_final(data_sub[-1])
@@ -52,7 +50,6 @@ generate_data_division <- function(df, type = "divisions_area") {
     col_select <-  tidyselect::all_of(c("kommunikasjon", "informasjon",
                                         "programmer", "utstyr"))
   } else if (type == "divisions_competence") {
-    browser()
     df_div_out <- df %>%
       generate_data_division_prelim() %>%
       generate_data_division_competence()
@@ -118,7 +115,6 @@ generate_data_division_prelim <- function(df) {
   return(df_div_out)
 }
 generate_data_division_competence <- function(df) {
-  browser()
   df_div_out <- df
   names(df_div_out)[2] <- "sub_category"
   df_div_out <- df_div_out %>%
