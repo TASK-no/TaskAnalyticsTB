@@ -39,7 +39,7 @@ plot_radar_def <- function(df, year, col_scm) {
                                                          "green")]),
                                labels = c("Kommunikasjon og samhandling",
                                           "Informasjonssikkerhet og personvern",
-                                          "Bruk av programmvare",
+                                          "Bruk av programvare",
                                           "Bruk av teknologi")) +
     ggplot2::ylab("") +
     ggplot2::xlab("Digital Kompetanse") +
@@ -113,7 +113,7 @@ get_data_summary_radar <- function(data_set) {
                                        ordered = TRUE) %>%
     dplyr::recode_factor(kommunikasjon_freq_perc = "Kommunikasjon og samhandling",
                          informasjon_freq_perc = "Informasjonssikkerhet og personvern",
-                         programmer_freq_perc = "Bruk av programmvare",
+                         programmer_freq_perc = "Bruk av programvare",
                          utstyr_freq_perc = "Bruk av teknologi",
                          .ordered = TRUE)
   data_out %>% dplyr::select(.data$year,
