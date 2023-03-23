@@ -7,7 +7,8 @@
 plot_division(
   data_set,
   year,
-  return_type = "default",
+  title,
+  y_title = "Digital kompetanse i divisjonene",
   col_scm = c(light_blue = "#189BC4", dark_blue = "#3F505A", orange = "#F59331",
     light_green = "#54B64E", green = "#58B02C", dark_green = "#356A1A", black1 =
     "#1F282D", black2 = "#263036")
@@ -20,9 +21,10 @@ output list from [get_data_summary()] (if set to type = "all") or the
 
 \item{year}{the year as an integer (2021, 2022, or 2023)}
 
-\item{return_type}{a character: either 'default' which generates a
-ggplot2-plot or 'shinyDB' which generates a plotly-type plot for the
-corresponding shiny Dashboard}
+\item{title}{title of plot}
+
+\item{y_title}{sub-title of y-axis names (which consist of year and
+`y_title`)}
 
 \item{col_scm}{the col-scheme; default is the task color scheme as hard coded}
 }
