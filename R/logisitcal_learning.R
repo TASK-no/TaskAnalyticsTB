@@ -79,6 +79,7 @@ logistic_learn <- function(data_set = NULL, model = NULL, type = "default") {
   } else if (type == "shinyDB") {
     out <- logistic_learn_shy(data_set, model)
     out <- list(model_summary = out$summary_logistic_model,
+                psR2_info = out$summary_psR2,
                 odds_info = out$summary_odds,
                 fail_conv = out$summary_converged,
                 fail_num = out$summary_numerical)
@@ -142,6 +143,7 @@ logistic_learn_def <- function(data_set, model) {
 }
 logistic_learn_shy <- function(data_set, model) {
   logistic_out_sum <- NULL
+  logistic_out_pR2 <- NULL
   logistic_out_odd <- NULL
   logistic_out_cnv <- NULL
   logistic_out_num <- NULL
@@ -168,21 +170,78 @@ logistic_learn_shy <- function(data_set, model) {
     if (names(logistic_out)[2] == "mywarn") {
       logistic_out_cnv <- grepl("converge", logistic_out[[2]][[1]])
       logistic_out_num <- grepl("numerically", logistic_out[[2]][[1]])
-      logistic_out_sum <- summary(logistic_out[[1]])
+      logistic_out     <- logistic_out[[1]]
+      logistic_out_sum <- summary(logistic_out)
     } else {
       logistic_out_sum <- summary(logistic_out)
     }
-    logistic_out_odd <- exp(logistic_out_sum$coefficients[, 1, drop = FALSE])
+    logistic_out_pR2 <- get_logistic_pseudoR2(log_out = logistic_out,
+                                              data_set = data_short)
+    logistic_out_odd <- get_logistic_odds_probs(logistic_out)
   } else if(isFALSE(check_match)) {
     msg <- paste0("Datasett for det", paste0("\u00e5" ,"r"),
                   "et har ikke de spesifiserte regressorene!")
     logistic_out_sum <- msg
+    logistic_out_pR2 <- msg
     logistic_out_odd <- msg
   }
   return(list(summary_logistic_model = logistic_out_sum,
+              summary_psR2 = logistic_out_pR2,
               summary_odds = logistic_out_odd,
               summary_converged = logistic_out_cnv,
               summary_numerical = logistic_out_num))
+}
+get_logistic_pseudoR2 <- function(log_out = NULL,
+                                  data_set = NULL) {
+  ################################### SOURCES###################################
+  # https://stats.stackexchange.com/questions/8511/how-to-calculate-pseudo-r2-from-rs-logistic-regression
+  # https://de.wikipedia.org/wiki/Pseudo-Bestimmtheitsma%C3%9F
+  ##############################################################################
+  if (is.null(log_out)) stop("Cannot compute pseudo R^2 without model arg.")
+  if ( is.null(data_set)) {
+    pR2_McFD <-  1 - log_out$deviance / log_out$null.deviance # works for glm
+  } else if (!is.null(data_set)) {
+    log_outNULL <- stats::glm(as.formula(paste0(names(data_set)[1], " ~ 1")),
+                              data = data_set,
+                              family = stats::binomial(link = "logit"))
+    LLfull <- unclass(logLik(log_out))[[1]]
+    LLnull <- unclass(logLik(log_outNULL))[[1]]
+    numreg <- ncol(data_set) - 1
+    pR2_McFD      <-  1 - LLfull / LLnull
+    pR2_McFD_corr <-  1 - ((LLfull -  numreg)/ LLnull)
+  }
+  out <- matrix(c(pR2_McFD, pR2_McFD_corr), nrow = 1)
+  colnames(out) <- c("McFadden R2", "korrigert McFadden R2")
+  rownames(out) <- "->"
+  return(out)
+}
+get_logistic_odds_probs <- function(log_out) {
+  tmp_out <- tryCatch(comput_odds(log_out, WITH_CI = TRUE),
+                      warning = function(w) {
+                        return(
+                          list(comput_odds(log_out, WITH_CI = FALSE),
+                               mywarn = w))},
+                      error = function(e) {
+                        return(
+                          list(comput_odds(log_out, WITH_CI = FALSE),
+                               myerr = e))})
+  if (!is.null(names(tmp_out))) {
+    tmp_fill <- rep(NA_real_, times = length(tmp_out[[1]]))
+    tmp_out  <- cbind(tmp_out[[1]], tmp_fill, tmp_fill)
+  }
+  colnames(tmp_out) <- c("Oddsratio",
+                         "KI nedre grense",
+                         "KI øvre grense")
+  tmp_out
+}
+comput_odds <- function(log_model_output, WITH_CI) {
+  if(isTRUE(WITH_CI)) {
+    tmp <- exp(cbind(coef(log_model_output),
+                     confint(log_model_output)))
+  } else if (isFALSE(WITH_CI)) {
+    tmp <- exp(coef(log_model_output))
+  }
+  round(tmp, digits = 2)
 }
 parse_model_to_formula <- function(model) {
   dependent           <- model$dependent
