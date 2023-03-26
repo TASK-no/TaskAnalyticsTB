@@ -18,6 +18,7 @@ plot_overall <- function(data_all, return_type = "default",
                                      dark_green = "#356A1A",
                                      black1 = "#1F282D",
                                      black2 = "#263036")) {
+  browser()
   if (return_type == "default") {
     return(plot_overall_def(data_all, col_scm))
   } else if (return_type == "shinyDB") {
@@ -37,7 +38,7 @@ plot_overall_shy <- function(data_set, col_scm) {
                                                  "Avansert"),
                                       ordered = TRUE),
                   total_freq_perc = .data$total_freq_perc * 100)
-  fig <- plotly::plot_ly(data = data_use)
+  fig <-plotly::plot_ly(data = data_use)
   fig <- fig %>%
     plotly::add_trace(y = ~kategorier,
                       x = ~total_freq_perc,
