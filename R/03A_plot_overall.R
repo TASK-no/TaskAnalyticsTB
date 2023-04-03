@@ -18,7 +18,6 @@ plot_overall <- function(data_all, return_type = "default",
                                      dark_green = "#356A1A",
                                      black1 = "#1F282D",
                                      black2 = "#263036")) {
-  browser()
   if (return_type == "default") {
     return(plot_overall_def(data_all, col_scm))
   } else if (return_type == "shinyDB") {
