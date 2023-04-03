@@ -41,8 +41,12 @@ get_data_summary <- function(data_segm, year, type = "all") {
     df_final_data <- generate_data_final(data_sub[-1])
     generate_data_report(df_final_data, year)
   }
+  # else if (type == "report-divisions") {
+  #   df_final_data <- generate_data_final(data_sub)
+  #   generate_data_report(df_final_data, year)
+  # }
 }
-generate_data_division <- function(df, type = "divisions_area") {
+generate_data_division <- function(df, type) {
   if (type == "divisions_area") {
     df_div_out <- df %>%
       generate_data_division_prelim() %>%
@@ -118,10 +122,21 @@ generate_data_division_competence <- function(df) {
   df_div_out <- df
   names(df_div_out)[2] <- "sub_category"
   df_div_out <- df_div_out %>%
+    dplyr::rowwise() %>%
+    dplyr::mutate(
+      all_comp = sum(
+        .data$kommunikasjon,
+        .data$informasjon,
+        .data$programmer,
+        .data$utstyr,
+        na.rm = TRUE)
+      )
+  df_div_out <- df_div_out %>%
     tidyr::pivot_longer(cols = tidyselect::all_of(c("kommunikasjon",
                                                     "informasjon",
                                                     "programmer",
-                                                    "utstyr")),
+                                                    "utstyr",
+                                                    "all_comp")),
                         names_to = "category",
                         values_to = "all_total")
   df_div_out <- df_div_out %>%
@@ -161,7 +176,8 @@ match_list_category <- function(cat, cat_type = "area") {
     cat_new <- c(`kommunikasjon` = "Kommunikasjon og samhandling",
                  `informasjon` = "Informasjonssikkerhet og personvern",
                  `programmer` = "Bruk av programvare",
-                 `utstyr` = "Bruk av teknologi")
+                 `utstyr` = "Bruk av teknologi",
+                 `all_comp` = "Alle kompetanser")
   } else if (cat_type == "competence") {
     cat_new <- c(`Uerfaren` = "Uerfaren",
                  `Grunnleggende` = "Grunnleggende",
