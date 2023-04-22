@@ -27,7 +27,7 @@ get_data_summary <- function(data_segm, year, type = "all") {
   if (type == "all") {
     df_final_data      <- generate_data_final(data_sub[-1])
     df_final_report    <- generate_data_report(df_final_data, year)
-    df_final_divisions <- generate_data_division(data_sub)
+    df_final_divisions <- generate_data_division(data_sub, "divisions_area")
     return(list(df_final_data = df_final_data,
                 df_final_report = df_final_report,
                 df_final_divisions = df_final_divisions))
