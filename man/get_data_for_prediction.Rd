@@ -4,22 +4,23 @@
 \alias{get_data_for_prediction}
 \title{Transforms data set into a format suitable for logit regressions.}
 \usage{
-get_data_for_prediction(data_set, dependent, regressors, experience)
+get_data_for_prediction(data_set, model)
 }
 \arguments{
 \item{data_set}{a data set as \code{data.frame} or \code{tibble}}
 
-\item{dependent}{the name of the dependent variable as a character string}
-
-\item{regressors}{the names of the regressor variables as a character vector}
-
-\item{experience}{the experience levels as a two-dimensional character
-vector with values of either
+\item{model}{a list with the following items
 \itemize{
-  \item Uerfaren
-  \item Grunnleggende
-  \item Videregende
-  \item Avansert
+\item `dependent` the name of the dependent variable as a character string
+\item `regressors` the names of the regressor variables as a character vector
+\item `experience` the experience levels as a two-dimensional character
+  of which vector with values of either
+  \itemize{
+    \item Uerfaren
+    \item Grunnleggende
+    \item Videregende
+    \item Avansert
+  }
 }}
 }
 \value{

@@ -14,25 +14,30 @@
 #'   }
 #'
 #' @param data_set a data set as \code{data.frame} or \code{tibble}
-#' @param dependent the name of the dependent variable as a character string
-#' @param regressors the names of the regressor variables as a character vector
-#' @param experience the experience levels as a two-dimensional character
-#'   vector with values of either
+#' @param model a list with the following items
+#' \itemize{
+#' \item `dependent` the name of the dependent variable as a character string
+#' \item `regressors` the names of the regressor variables as a character vector
+#' \item `experience` the experience levels as a two-dimensional character
+#'   of which vector with values of either
 #'   \itemize{
 #'     \item Uerfaren
 #'     \item Grunnleggende
 #'     \item Videregende
 #'     \item Avansert
 #'   }
+#' }
 #'
 #' @return a data set (as a \code{data.frame}) shortened and thus suitable for
 #'   prediction via logit regressions; the output data has dependent variable
 #'   and regressors only
 #' @export
 get_data_for_prediction <- function(data_set,
-                                    dependent,
-                                    regressors,
-                                    experience) {
+                                    model) {
+  browser()
+  dependent <- model$dependent
+  regressors <- model$regressors
+  experience <- model$experience
   coding_experience <- c(Uerfaren = 1, Grunnleggende = 2,
                          "Videreg\u00e5ende" = 3, Avansert = 4)
   data_short <- data_set %>% dplyr::select(dependent,
