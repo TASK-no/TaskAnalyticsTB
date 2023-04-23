@@ -32,9 +32,9 @@
 #'   prediction via logit regressions; the output data has dependent variable
 #'   and regressors only
 #' @export
-get_data_for_prediction <- function(data_set,
-                                    model) {
+get_data_for_prediction <- function(data_set, model) {
   browser()
+  if (is.null(data_set)) return(NULL)
   dependent <- model$dependent
   regressors <- model$regressors
   experience <- model$experience
@@ -102,9 +102,7 @@ logistic_predict <- function(data_set, model,
 
   sample_pred_seq <- (num_train + 1):num_obs
   data_pred <- get_data_for_prediction(data_set[sample_pred_seq, ],
-                                       dependent = model$dependent,
-                                       regressors =  model$regressors,
-                                       experience =  model$experience)
+                                       model)
 
   truePRED <- as.integer(data_pred[[model$dependent]]) - 1
 
@@ -119,14 +117,11 @@ logistic_predict <- function(data_set, model,
   # InformationValue::specificity(truePRED, predictions, threshold = optCutOff21)
 }
 logistic_learn_def <- function(data_set, model) {
-  dependent         <- model$dependent
-  regressors        <- model$regressors
+  dependent  <- model$dependent
+  regressors <- model$regressors
   experience <- model$experience
 
-  data_short <- get_data_for_prediction(data_set,
-                                        dependent,
-                                        regressors,
-                                        experience)
+  data_short <- get_data_for_prediction(data_set, model)
 
   model_formula <- stats::as.formula(paste(dependent,
                                            paste(regressors,
@@ -154,11 +149,8 @@ logistic_learn_shy <- function(data_set, model) {
   logistic_out_num <- NULL
 
   model_formula <- parse_model_to_formula(model)
-  data_short    <- get_data_for_prediction(data_set,
-                                           model$dependent,
-                                           model$regressors,
-                                           model$experience)
-  check_match <- check_forumula_data_match(data_short, model_formula)
+  data_short    <- get_data_for_prediction(data_set, model)
+  check_match   <- check_forumula_data_match(data_short, model_formula)
 
   if (isTRUE(check_match)) {
     logistic_out <- tryCatch(stats::glm(model_formula,
@@ -269,4 +261,16 @@ check_forumula_data_match <- function(data_set, formula_taken) {
   formula_to_check <- gsub(" ", "", strsplit(as.character(formula_taken[3]),
                                              "\\+")[[1]])
   setequal(col_to_check, formula_to_check)
+}
+get_true_ones <- function(data_set_predictions) {
+  if (is.null(data_set_predictions)) return(NULL)
+  as.integer(data_set_predictions[["dependent"]]) - 1
+}
+generate_predictions <- function(logistic_model,
+                                 new_data,
+                                 type = "response") {
+  if(is.null(logistic_model)) return(NULL)
+  predict21 <- predict(logistic_model,
+                       newdata = new_data[, -c(1)],
+                       type = "response")
 }
