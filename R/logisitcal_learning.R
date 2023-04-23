@@ -33,7 +33,6 @@
 #'   and regressors only
 #' @export
 get_data_for_prediction <- function(data_set, model) {
-  browser()
   if (is.null(data_set)) return(NULL)
   dependent <- model$dependent
   regressors <- model$regressors
@@ -83,7 +82,8 @@ logistic_learn <- function(data_set = NULL, model = NULL, type = "default") {
     out <- logistic_learn_def(data_set, model)
   } else if (type == "shinyDB") {
     out <- logistic_learn_shy(data_set, model)
-    out <- list(model_summary = out$summary_logistic_model,
+    out <- list(model_run = out$logistic_model,
+                model_summary = out$summary_logistic_model,
                 psR2_info = out$summary_psR2,
                 odds_info = out$summary_odds,
                 fail_conv = out$summary_converged,
@@ -169,7 +169,9 @@ logistic_learn_shy <- function(data_set, model) {
       logistic_out_num <- grepl("numerically", logistic_out[[2]][[1]])
       logistic_out     <- logistic_out[[1]]
       logistic_out_sum <- summary(logistic_out)
+      logistic_out_mod <- logistic_out
     } else {
+      logistic_out_mod <- logistic_out
       logistic_out_sum <- summary(logistic_out)
     }
     logistic_out_pR2 <- get_logistic_pseudoR2(log_out = logistic_out,
@@ -178,11 +180,13 @@ logistic_learn_shy <- function(data_set, model) {
   } else if(isFALSE(check_match)) {
     msg <- paste0("Datasett for det", paste0("\u00e5" ,"r"),
                   "et har ikke de spesifiserte regressorene!")
+    logistic_out_mod <- msg
     logistic_out_sum <- msg
     logistic_out_pR2 <- msg
     logistic_out_odd <- msg
   }
-  return(list(summary_logistic_model = logistic_out_sum,
+  return(list(logistic_model = logistic_out_mod,
+              summary_logistic_model = logistic_out_sum,
               summary_psR2 = logistic_out_pR2,
               summary_odds = logistic_out_odd,
               summary_converged = logistic_out_cnv,
@@ -264,13 +268,40 @@ check_forumula_data_match <- function(data_set, formula_taken) {
 }
 get_true_ones <- function(data_set_predictions) {
   if (is.null(data_set_predictions)) return(NULL)
-  as.integer(data_set_predictions[["dependent"]]) - 1
+  as.integer(data_set_predictions[[1]]) - 1
 }
 generate_predictions <- function(logistic_model,
                                  new_data,
                                  type = "response") {
   if(is.null(logistic_model)) return(NULL)
-  predict21 <- predict(logistic_model,
-                       newdata = new_data[, -c(1)],
-                       type = "response")
+  predict(
+    logistic_model,
+    newdata = new_data[, -c(1)],
+    type = "response")
+}
+get_cls_infos <- function(true_ones, preds) {
+  if (is.null(true_ones) || is.null(preds)) return(NULL)
+  opt_cut_off <- InformationValue::optimalCutoff(
+    true_ones,
+    preds)
+  miss_class_error <- InformationValue::misClassError(
+    true_ones,
+    preds,
+    threshold = opt_cut_off)
+  concordance <- InformationValue::Concordance(
+    true_ones,
+    preds)
+  sensitivity <- InformationValue::sensitivity(
+    true_ones,
+    preds,
+    threshold = opt_cut_off)
+  specificity <- InformationValue::specificity(
+    true_ones,
+    preds,
+    threshold = opt_cut_off)
+  list(opt_cut_off = opt_cut_off,
+       miss_class_error = miss_class_error,
+       concordance = concordance,
+       sensitivity = sensitivity,
+       specificity = specificity)
 }
