@@ -279,7 +279,7 @@ generate_predictions <- function(logistic_model,
     newdata = new_data[, -c(1)],
     type = "response")
 }
-get_cls_infos <- function(true_ones, preds) {
+get_cls_infos <- function(true_ones, preds, thrsh) {
   if (is.null(true_ones) || is.null(preds)) return(NULL)
   opt_cut_off <- InformationValue::optimalCutoff(
     true_ones,
@@ -287,21 +287,21 @@ get_cls_infos <- function(true_ones, preds) {
   miss_class_error <- InformationValue::misClassError(
     true_ones,
     preds,
-    threshold = opt_cut_off)
+    threshold = thrsh)
   concordance <- InformationValue::Concordance(
     true_ones,
     preds)
   sensitivity <- InformationValue::sensitivity(
     true_ones,
     preds,
-    threshold = opt_cut_off)
+    threshold = thrsh)
   specificity <- InformationValue::specificity(
     true_ones,
     preds,
-    threshold = opt_cut_off)
+    threshold = thrsh)
   list(opt_cut_off = opt_cut_off,
+       concordance = concordance[1],
        miss_class_error = miss_class_error,
-       concordance = concordance,
        sensitivity = sensitivity,
-       specificity = specificity)
+       minus_specificity = 1 - specificity)
 }
