@@ -43,7 +43,7 @@ get_data_for_prediction <- function(data_set, model) {
                                            dplyr::any_of(regressors))
   all_vars <- names(data_short)
   data_short <- tibble::as_tibble(lapply(data_short[all_vars], as.factor))
-  if("leder_c" %in% regressors && isTRUE(!is.factor(data_set$leder_c))) {
+  if ("leder_c" %in% regressors && isTRUE(!is.factor(data_set$leder_c))) {
     new_leder <- (as.integer(data_short$leder_c) - 2) * (-1) + 1
     new_leder <- c("Nei", "Ja")[new_leder]
     new_leder <- factor(new_leder, levels = c("Nei", "Ja"))
@@ -119,14 +119,14 @@ logistic_predict <- function(data_set, model,
 logistic_learn_def <- function(data_set, model) {
   dependent  <- model$dependent
   regressors <- model$regressors
-  experience <- model$experience
+  # experience <- model$experience
 
   data_short <- get_data_for_prediction(data_set, model)
 
   model_formula <- stats::as.formula(paste(dependent,
                                            paste(regressors,
-                                                 collapse=" + "),
-                                           sep=" ~ "))
+                                                 collapse = " + "),
+                                           sep = " ~ "))
 
   logistic_model <- stats::glm(model_formula,
                                data = data_short,
@@ -177,7 +177,7 @@ logistic_learn_shy <- function(data_set, model) {
     logistic_out_pR2 <- get_logistic_pseudoR2(log_out = logistic_out,
                                               data_set = data_short)
     logistic_out_odd <- get_logistic_odds_probs(logistic_out)
-  } else if(isFALSE(check_match)) {
+  } else if (isFALSE(check_match)) {
     msg <- paste0("Datasett for det", paste0("\u00e5" ,"r"),
                   "et har ikke de spesifiserte regressorene!")
     logistic_out_mod <- msg
@@ -209,7 +209,7 @@ get_logistic_pseudoR2 <- function(log_out = NULL,
     LLnull <- unclass(logLik(log_outNULL))[[1]]
     numreg <- ncol(data_set) - 1
     pR2_McFD      <-  1 - LLfull / LLnull
-    pR2_McFD_corr <-  1 - ((LLfull -  numreg)/ LLnull)
+    pR2_McFD_corr <-  1 - ((LLfull -  numreg) / LLnull)
   }
   out <- matrix(c(pR2_McFD, pR2_McFD_corr), nrow = 1)
   colnames(out) <- c("McFadden R2", "korrigert McFadden R2")
@@ -236,7 +236,7 @@ get_logistic_odds_probs <- function(log_out) {
   tmp_out
 }
 comput_odds <- function(log_model_output, WITH_CI) {
-  if(isTRUE(WITH_CI)) {
+  if (isTRUE(WITH_CI)) {
     tmp <- exp(cbind(coef(log_model_output),
                      confint(log_model_output)))
   } else if (isFALSE(WITH_CI)) {
@@ -254,7 +254,7 @@ parse_model_to_formula <- function(model) {
   return(model_formula)
 }
 get_regs <- function(regs) {
-  if(is.null(regs)) return(" 1 ")
+  if (is.null(regs)) return(" 1 ")
   paste(regs, collapse = " + ")
 }
 get_model_forumula_char <- function(dep, regs) {
@@ -273,7 +273,7 @@ get_true_ones <- function(data_set_predictions) {
 generate_predictions <- function(logistic_model,
                                  new_data,
                                  type = "response") {
-  if(is.null(logistic_model)) return(NULL)
+  if (is.null(logistic_model)) return(NULL)
   predict(
     logistic_model,
     newdata = new_data[, -c(1)],
