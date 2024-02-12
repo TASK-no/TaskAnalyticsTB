@@ -266,6 +266,17 @@ check_forumula_data_match <- function(data_set, formula_taken) {
                                              "\\+")[[1]])
   setequal(col_to_check, formula_to_check)
 }
+#' Extract True Class Labels from Prediction Data Set
+#'
+#' This function extracts the true class labels as binary outcomes (0 or 1)
+#' from a given prediction data set. It is assumed that the first column of the
+#' data set contains the dependent variable with values coded accordingly.
+#'
+#' @param data_set_predictions A data frame containing the predictions, with the
+#' first column being the dependent variable.
+#'
+#' @return A numeric vector containing the true class labels as 0 or 1.
+#' @export
 get_true_ones <- function(data_set_predictions) {
   if (is.null(data_set_predictions)) return(NULL)
   as.integer(data_set_predictions[[1]]) - 1
@@ -279,6 +290,19 @@ generate_predictions <- function(logistic_model,
     newdata = new_data[, -c(1)],
     type = "response")
 }
+#' Calculate Classification Metrics and Optimal Cutoff
+#'
+#' Computes various classification metrics including the optimal cutoff for
+#' classification, misclassification error, concordance, sensitivity, and
+#' specificity based on true outcomes and predicted probabilities.
+#'
+#' @param true_ones Numeric vector of true class labels (0 or 1).
+#' @param preds Numeric vector of predicted probabilities for the positive class.
+#' @param thrsh Numeric value specifying the threshold for classification.
+#'
+#' @return A list containing the optimal cutoff, concordance, misclassification
+#' error, sensitivity, and one minus specificity.
+#' @export
 get_cls_infos <- function(true_ones, preds, thrsh) {
   if (is.null(true_ones) || is.null(preds)) return(NULL)
   opt_cut_off <- InformationValue::optimalCutoff(
