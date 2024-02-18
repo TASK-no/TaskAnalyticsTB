@@ -41,14 +41,6 @@ get_data_for_prediction <- function(data_set, model) {
                          "Videreg\u00e5ende" = 3, Avansert = 4)
   data_short <- data_set %>% dplyr::select(dependent,
                                            dplyr::any_of(regressors))
-  all_vars <- names(data_short)
-  data_short <- tibble::as_tibble(lapply(data_short[all_vars], as.factor))
-  if ("leder_c" %in% regressors && isTRUE(!is.factor(data_set$leder_c))) {
-    new_leder <- (as.integer(data_short$leder_c) - 2) * (-1) + 1
-    new_leder <- c("Nei", "Ja")[new_leder]
-    new_leder <- factor(new_leder, levels = c("Nei", "Ja"))
-    data_short[, "leder_c"] <- new_leder
-  }
 
   data_out <- data_short %>%
     dplyr::filter(as.integer(data_short[[dependent]]) %in% coding_experience[experience])
