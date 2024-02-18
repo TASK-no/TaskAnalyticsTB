@@ -113,8 +113,10 @@ generate_data_division_prelim <- function(df) {
   df_div_out <- df_div_out %>%
     add_missing_kat()
 
-  nam_div <- names(attr(df$SamDivision, "labels"))
-  df_div_out$SamDivision <- factor(df_div_out$SamDivision, labels = nam_div)
+  if (inherits(df$SamDivision, "haven_labelled")) {
+    nam_div <- names(attr(df$SamDivision, "labels"))
+    df_div_out$SamDivision <- factor(df_div_out$SamDivision, labels = nam_div)
+  }
   df_div_out$SamDivision <- match_list_sam_division(df_div_out$SamDivision)
   return(df_div_out)
 }
@@ -248,15 +250,23 @@ add_missing_kat <- function(df) {
   return(df_out)
 }
 get_vec_of_changes <- function(var) {
-  out <- table(factor(as.character(var),
-                      levels = unname(attr(var, which = "labels"))))
+  if (inherits(var, "haven_labelled")) {
+    out <- table(factor(as.character(var),
+                        levels = unname(attr(var, which = "labels"))))
+  } else {
+    out <- table(var)
+  }
   out <- which(unname(sapply(out, function(x) {x < 4})))
   return(out)
 }
 get_sam_div_unique <- function(sam_div) {
-  num_div <- length(attr(sam_div, which = "labels"))
-  sort(c(unique(sam_div),
-         setdiff(seq_len(num_div), unique(sam_div))))
+  if (inherits(sam_div, "haven_labelled")) {
+    num_div <- length(attr(sam_div, which = "labels"))
+    return(sort(c(unique(sam_div), setdiff(seq_len(num_div), unique(sam_div)))))
+  } else {
+    lvl_all <- levels(sam_div)
+    return(factor(lvl_all, levels = lvl_all))
+  }
 }
 generate_data_final <- function(df) {
   num_obs <- nrow(df)
