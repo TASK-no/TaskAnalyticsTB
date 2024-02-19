@@ -22,4 +22,7 @@ Imports:
     stats,
     ggplot2,
     grid,
-    gridExtra
+    gridExtra,
+    InformationValue,
+    plotly,
+    scales
