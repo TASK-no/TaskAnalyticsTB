@@ -302,6 +302,7 @@ generate_predictions <- function(logistic_model,
                                  new_data,
                                  type = "response") {
   if (is.null(logistic_model)) return(NULL)
+  if (is.null(new_data)) return(NULL)
   predict(
     logistic_model,
     newdata = new_data[, -c(1)],
