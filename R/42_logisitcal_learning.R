@@ -273,6 +273,31 @@ get_true_ones <- function(data_set_predictions) {
   if (is.null(data_set_predictions)) return(NULL)
   as.integer(data_set_predictions[[1]]) - 1
 }
+#' Generate Predictions Using a Logistic Model
+#'
+#' This function generates predictions from a logistic regression model for a
+#' new dataset. It assumes the model is already fitted using logistic regression
+#' and the new data is prepared in a similar format as the training data. The
+#' function is designed to work with binary classification problems.
+#'
+#' @param logistic_model A logistic regression model object, typically created
+#'   and trained using \code{\link[stats]{glm}} with a binomial family. This
+#'   model is used to generate predictions on the new data.
+#' @param new_data A data frame or matrix containing the new observations for
+#'   which predictions are to be made. The structure of this data should match
+#'   the model's training data, excluding the dependent variable.
+#' @param type Character string specifying the type of prediction required.
+#'   Default is "response", which returns predicted probabilities. Other options
+#'   depend on the \code{\link[stats]{predict.glm}} method, such as "link" for
+#'   the linear predictors.
+#'
+#' @return A numeric vector of predicted probabilities for the positive class
+#'   (assuming a binary classification problem) if \code{type = "response"} is
+#'   used. The length of the vector matches the number of rows in
+#'   \code{new_data}. For other values of \code{type}, the return value follows
+#'   the specification of \code{\link[stats]{predict.glm}}.
+#'
+#' @export
 generate_predictions <- function(logistic_model,
                                  new_data,
                                  type = "response") {
