@@ -29,7 +29,7 @@ plot_pie_figures <- function(data_set, year, return_type = "default",
     title_taken <- grid::textGrob(title_taken,
                                   gp = grid::gpar(fontsize = 25,
                                                   font = 8))
-    p_lst <- generate_pie_plot_def(df, col_scm = col_scm)
+    p_lst <- generate_pie_plot_def(data_set = df_final_data, col_scm = col_scm)
     p_jnd <- gridExtra::grid.arrange(p_lst[[1]], p_lst[[2]],
                                      p_lst[[3]], p_lst[[4]],
                                      nrow = 2, top = title_taken,
