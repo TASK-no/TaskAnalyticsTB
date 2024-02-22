@@ -94,17 +94,14 @@ add_pie_def <- function(data_set, var_y, var_fill,
                        color = settings_text$col, size = settings_text$size) +
     ggplot2::scale_fill_brewer(palette = col_palette)
 }
-generate_pie_plot_shy <- function(data_set,
-                                  lo_vars = c("kommunikasjon_freq",
-                                              "informasjon_freq",
-                                              "programmer_freq",
-                                              "utstyr_freq"),
-                                  lo_subtitles = c("Kommunikasjon og samhandling",
-                                                   "Informasjonssikkerhet og personvern",
-                                                   "Bruk av programvare",
-                                                   "Bruk av teknologi"),
-                                  title_text,
-                                  col_scm) {
+generate_pie_plot_shy <- function(
+    data_set,
+    lo_vars = c("kommunikasjon_freq", "informasjon_freq",
+                "programmer_freq", "utstyr_freq"),
+    lo_subtitles = c("Kommunikasjon og samhandling",
+                     "Informasjonssikkerhet og personvern",
+                     "Bruk av programvare", "Bruk av teknologi"),
+    title_text, col_scm) {
   stopifnot(length(lo_vars) == length(lo_subtitles))
   num_pies <- length(lo_vars)
   if (num_pies == 4) layout_pies <- list(first  = list(row = 0, column = 0),
@@ -122,8 +119,7 @@ generate_pie_plot_shy <- function(data_set,
   fig <- fig %>% plotly::layout(title = title_text,
                                 legend = list(orientation = "v",
                                               xanchor = "right"),
-                                # showlegend = TRUE,
-                                grid = list(rows=2, columns=2),
+                                grid = list(rows = 2, columns = 2),
                                 xaxis = list(showgrid = FALSE,
                                              zeroline = FALSE,
                                              showticklabels = FALSE),
