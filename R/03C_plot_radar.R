@@ -66,7 +66,7 @@ plot_radar_shy <- function(df, year, col_scm) {
   #                                  "black2",
   #                                  "black1",
   #                                  "green")])
-  data_use <- df %>% dplyr::mutate(value = value * 100)
+  data_use <- df %>% dplyr::mutate(value = .data$value * 100)
   fig <- plotly::plot_ly(data = data_use)
   fig <- fig %>%
     plotly::add_trace(y = ~kategorier,
