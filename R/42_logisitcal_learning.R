@@ -98,9 +98,9 @@ logistic_predict <- function(data_set, model,
 
   truePRED <- as.integer(data_pred[[model$dependent]]) - 1
 
-  predictions <- predict(out1$logistic_model,
-                         newdata = data_pred[, -c(1)],
-                         type = "response")
+  predictions <- stats::predict(out1$logistic_model,
+                                newdata = data_pred[, -c(1)],
+                                type = "response")
   # optCutOff21 <- InformationValue::optimalCutoff(truePRED, predictions)
   # InformationValue::misClassError(truePRED, predictions, threshold = optCutOff21)
   # InformationValue::plotROC(truePRED, predictions,  Show.labels = TRUE)
@@ -194,11 +194,12 @@ get_logistic_pseudoR2 <- function(log_out = NULL,
   if ( is.null(data_set)) {
     pR2_McFD <-  1 - log_out$deviance / log_out$null.deviance # works for glm
   } else if (!is.null(data_set)) {
-    log_outNULL <- stats::glm(as.formula(paste0(names(data_set)[1], " ~ 1")),
-                              data = data_set,
-                              family = stats::binomial(link = "logit"))
-    LLfull <- unclass(logLik(log_out))[[1]]
-    LLnull <- unclass(logLik(log_outNULL))[[1]]
+    log_outNULL <- stats::glm(
+      stats::as.formula(paste0(names(data_set)[1], " ~ 1")),
+      data = data_set,
+      family = stats::binomial(link = "logit"))
+    LLfull <- unclass(stats::logLik(log_out))[[1]]
+    LLnull <- unclass(stats::logLik(log_outNULL))[[1]]
     numreg <- ncol(data_set) - 1
     pR2_McFD      <-  1 - LLfull / LLnull
     pR2_McFD_corr <-  1 - ((LLfull -  numreg) / LLnull)
@@ -229,10 +230,10 @@ get_logistic_odds_probs <- function(log_out) {
 }
 comput_odds <- function(log_model_output, WITH_CI) {
   if (isTRUE(WITH_CI)) {
-    tmp <- exp(cbind(coef(log_model_output),
-                     confint(log_model_output)))
+    tmp <- exp(cbind(stats::coef(log_model_output),
+                     stats::confint(log_model_output)))
   } else if (isFALSE(WITH_CI)) {
-    tmp <- exp(coef(log_model_output))
+    tmp <- exp(stats::coef(log_model_output))
   }
   round(tmp, digits = 2)
 }
@@ -303,10 +304,7 @@ generate_predictions <- function(logistic_model,
                                  type = "response") {
   if (is.null(logistic_model)) return(NULL)
   if (is.null(new_data)) return(NULL)
-  predict(
-    logistic_model,
-    newdata = new_data[, -c(1)],
-    type = "response")
+  stats::predict(logistic_model, newdata = new_data[, -c(1)], type = "response")
 }
 #' Calculate Classification Metrics and Optimal Cutoff
 #'

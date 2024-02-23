@@ -44,24 +44,17 @@ plot_pie_figures <- function(data_set, year, return_type = "default",
   }
   return(p_jnd)
 }
-generate_pie_plot_def <- function(data_set,
-                                  lo_vars = c("prop_k",
-                                              "prop_i",
-                                              "prop_p",
-                                              "prop_u"),
-                                  lo_pos = c("ypos_k",
-                                             "ypos_i",
-                                             "ypos_p",
-                                             "ypos_u"),
-                                  lo_labs = c("kommunikasjon_freq_perc",
-                                              "informasjon_freq_perc",
-                                              "programmer_freq_perc",
-                                              "utstyr_freq_perc"),
-                                  lo_subtitles = c("Kommunikasjon og samhandling",
-                                                   "Informasjonssikkerhet og personvern",
-                                                   "Bruk av programvare",
-                                                   "Bruk av teknologi"),
-                                  col_scm = "Set1") {
+generate_pie_plot_def <- function(
+    data_set,
+    lo_vars = c("prop_k", "prop_i", "prop_p", "prop_u"),
+    lo_pos = c("ypos_k", "ypos_i", "ypos_p", "ypos_u"),
+    lo_labs = c("kommunikasjon_freq_perc", "informasjon_freq_perc",
+                "programmer_freq_perc", "utstyr_freq_perc"),
+    lo_subtitles = c("Kommunikasjon og samhandling",
+                     "Informasjonssikkerhet og personvern",
+                     "Bruk av programvare",
+                     "Bruk av teknologi"),
+    col_scm = "Set1") {
   stopifnot(length(lo_vars) == length(lo_pos))
   stopifnot(length(lo_pos) == length(lo_labs))
   stopifnot(length(lo_labs) == length(lo_subtitles))
@@ -129,23 +122,21 @@ generate_pie_plot_shy <- function(
   return(fig)
 }
 add_pie_shy <- function(fig, data_set, var_y, sub_title, pos, col_scm) {
-  fig %>% plotly::add_pie(data = data_set,
-                          labels = ~kategorier,
-                          values = ~eval(parse(text = var_y)),
-                          textposition = "outside",
-                          textinfo = 'text',
-                          insidetextfont = list(color = "#FFFFFF"),
-                          hoverinfo = "text",
-                          title = list(text = sub_title,
-                                       font = list(size = 14)),
-                          text = ~paste(round_perc(eval(parse(text = var_y)),
-                                                   sum(eval(parse(text = var_y))),
-                                                   digits = 2,
-                                                   add_perc_sign = TRUE), "%"),
-                          hovertext = ~paste(eval(parse(text = var_y)),
-                                             " arbeidstaker"),
-                          marker = list(colors = col_scm,
-                                        line = list(color = "#FFFFFF",
-                                                    width = 1)),
-                          domain = pos)
+  fig %>% plotly::add_pie(
+    data = data_set,
+    labels = ~kategorier,
+    values = ~eval(parse(text = var_y)),
+    textposition = "outside",
+    textinfo = 'text',
+    insidetextfont = list(color = "#FFFFFF"),
+    hoverinfo = "text",
+    title = list(text = sub_title, font = list(size = 14)),
+    text = ~paste(round_perc(eval(parse(text = var_y)),
+                             sum(eval(parse(text = var_y))),
+                             digits = 2,
+                             add_perc_sign = TRUE),
+                  "%"),
+    hovertext = ~paste(eval(parse(text = var_y)), " arbeidstaker"),
+    marker = list(colors = col_scm, line = list(color = "#FFFFFF", width = 1)),
+    domain = pos)
 }
