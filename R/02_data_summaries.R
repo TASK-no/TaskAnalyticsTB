@@ -281,15 +281,18 @@ generate_data_final <- function(df) {
                            "informasjon", "informasjon_freq",
                            "programmer", "programmer_freq",
                            "utstyr", "utstyr_freq")
-  df_final_out$kommunikasjon_freq_perc <- round_perc(df_final_out$kommunikasjon_freq,
-                                                     num_obs, digits = 2)
-  df_final_out$informasjon_freq_perc <- round_perc(df_final_out$informasjon_freq,
-                                                   num_obs, digits = 2)
-  df_final_out$programmer_freq_perc <- round_perc(df_final_out$programmer_freq,
-                                                  num_obs, digits = 2)
-  df_final_out$utstyr_freq_perc <- round_perc(df_final_out$utstyr_freq,
-                                              num_obs, digits = 2)
-
+  df_final_out$kommunikasjon_freq_perc <- round_perc(
+    df_final_out$kommunikasjon_freq,
+    num_obs, digits = 2)
+  df_final_out$informasjon_freq_perc <- round_perc(
+    df_final_out$informasjon_freq,
+    num_obs, digits = 2)
+  df_final_out$programmer_freq_perc <- round_perc(
+    df_final_out$programmer_freq,
+    num_obs, digits = 2)
+  df_final_out$utstyr_freq_perc <- round_perc(
+    df_final_out$utstyr_freq,
+    num_obs, digits = 2)
 
   df_final_out <- tibble::as_tibble(df_final_out)
   df_final_out <- df_final_out[, -c(3, 5, 7)]
@@ -298,21 +301,21 @@ generate_data_final <- function(df) {
 
   df_final_out <- df_final_out %>%
     dplyr::arrange(dplyr::desc(.data$kategorier)) %>%
-    dplyr::mutate(prop_k = .data$kommunikasjon_freq / sum(df_final_out$kommunikasjon_freq) * 100) %>%
-    dplyr::mutate(ypos_k = cumsum(.data$prop_k) - 0.5 * .data$prop_k) %>%
-    dplyr::mutate(prop_i = .data$informasjon_freq / sum(df_final_out$informasjon_freq) * 100) %>%
-    dplyr::mutate(ypos_i = cumsum(.data$prop_i) - 0.5 * .data$prop_i) %>%
-    dplyr::mutate(prop_p = .data$programmer_freq / sum(df_final_out$programmer_freq) * 100) %>%
-    dplyr::mutate(ypos_p = cumsum(.data$prop_p) - 0.5 * .data$prop_p) %>%
-    dplyr::mutate(prop_u = .data$utstyr_freq / sum(df_final_out$utstyr_freq) * 100) %>%
-    dplyr::mutate(ypos_u = cumsum(.data$prop_u) - 0.5 * .data$prop_u) %>%
+    dplyr::mutate(prop_k = compute_prop_trns(.data$kommunikasjon_freq)) %>%
+    dplyr::mutate(ypos_k = compute_ypos_trns(.data$prop_k)) %>%
+    dplyr::mutate(prop_i = compute_prop_trns(.data$informasjon_freq)) %>%
+    dplyr::mutate(ypos_i = compute_ypos_trns(.data$prop_i)) %>%
+    dplyr::mutate(prop_p = compute_prop_trns(.data$programmer_freq)) %>%
+    dplyr::mutate(ypos_p = compute_ypos_trns(.data$prop_p)) %>%
+    dplyr::mutate(prop_u = compute_prop_trns(.data$utstyr_freq)) %>%
+    dplyr::mutate(ypos_u = compute_ypos_trns(.data$prop_u)) %>%
     dplyr::rowwise() %>%
     dplyr::mutate(total_freq = sum(.data$kommunikasjon_freq,
                                    .data$informasjon_freq,
                                    .data$programmer_freq,
                                    .data$utstyr_freq)) %>%
     dplyr::mutate(total_freq_perc = round_perc(.data$total_freq,
-                                               (4*num_obs),
+                                               (4 * num_obs),
                                                digits = 2))
   return(dplyr::ungroup(df_final_out))
 }
@@ -325,10 +328,17 @@ generate_data_report <- function(df, year) {
                   .data$programmer_freq_perc, .data$utstyr_freq_perc,
                   .data$total_freq_perc)
 
-  df_out <- df_out %>% dplyr::mutate_at(.vars = dplyr::vars(dplyr::contains("perc")),
-                                        .funs = function(x) {x/100})
+  df_out <- df_out %>% dplyr::mutate_at(
+    .vars = dplyr::vars(dplyr::contains("perc")),
+    .funs = function(x) {x / 100})
   df_out$year <- year
   df_out <- df_out %>%
     dplyr::select("year", dplyr::everything())
   return(df_out)
+}
+compute_prop_trns <- function(x) {
+  x / sum(x) * 100
+}
+compute_ypos_trns <- function(x) {
+  cumsum(x) - 0.5 * x
 }
