@@ -57,8 +57,10 @@ generate_data_division <- function(df, type) {
     df_div_out <- df %>%
       generate_data_division_prelim() %>%
       generate_data_division_competence()
-    col_select <- tidyselect::all_of(c("Uerfaren", "Grunnleggende",
-                                       "Videregående", "Avansert"))
+    col_select <- tidyselect::all_of(c("Uerfaren",
+                                       "Grunnleggende",
+                                       "Videreg\u00e5ende",
+                                       "Avansert"))
   }
   df_div_out <- df_div_out %>%
     dplyr::group_by(.data$SamDivision, .data$category) %>%
@@ -98,14 +100,16 @@ generate_data_division_prelim <- function(df) {
                                  by = c("SamDivision",
                                         "category" = "kat_informasjon1"))
   df_div_out <- dplyr::full_join(df_div_out,
-                                 df %>% dplyr::group_by(.data$SamDivision,
-                                                        .data$kat_programmer1) %>%
+                                 df %>%
+                                   dplyr::group_by(.data$SamDivision,
+                                                   .data$kat_programmer1) %>%
                                    dplyr::summarise(programmer = dplyr::n()),
                                  by = c("SamDivision",
                                         "category" = "kat_programmer1"))
   df_div_out <- dplyr::full_join(df_div_out,
-                                 df %>% dplyr::group_by(.data$SamDivision,
-                                                        .data$kat_utstyr1) %>%
+                                 df %>%
+                                   dplyr::group_by(.data$SamDivision,
+                                                   .data$kat_utstyr1) %>%
                                    dplyr::summarise(utstyr = dplyr::n()),
                                  by = c("SamDivision",
                                         "category" = "kat_utstyr1"))
@@ -146,11 +150,12 @@ generate_data_division_competence <- function(df) {
                        values_from = "all_total")
 
   df_div_out <- df_div_out %>%
-    dplyr::rowwise() %>% dplyr::mutate(all_total = sum(.data$Uerfaren,
-                                                       .data$Grunnleggende,
-                                                       .data$Videregående,
-                                                       .data$Avansert,
-                                                       na.rm = TRUE))
+    dplyr::rowwise() %>%
+    dplyr::mutate(all_total = sum(.data$Uerfaren,
+                                  .data$Grunnleggende,
+                                  .data[["Videreg\u00e5ende"]],
+                                  .data$Avansert,
+                                  na.rm = TRUE))
   return(df_div_out)
 }
 generate_data_division_area <- function(df) {
@@ -163,28 +168,29 @@ generate_data_division_area <- function(df) {
   return(df_div_out)
 }
 match_list_sam_division <- function(division) {
-  div_new <- c(`A - Trafikant og kjøretøy` = "A - Trafikant",
-               `B - Utbygging` = "B - Utbygging",
-               `C - Drift og vedlikehold` = "C - Vedlikehold",
-               `D - Transport og samfunn` = "D - Transport",
-               `E - IT` = "E - IT",
-               `F - Fellesfunksjoner` = "F - Fellesfunksjoner",
-               `K - HR og HMS/Internrevisjonen/Kommunikasjon/Økonomi` = "K - HR/Økonomi",
-               `L - Myndighet og regelverk` = "L - Myndighet/regelverk")
+  div_new <- c("A - Trafikant og kj\u00f8ret\u00f8y" = "A - Trafikant",
+               "B - Utbygging" = "B - Utbygging",
+               "C - Drift og vedlikehold" = "C - Vedlikehold",
+               "D - Transport og samfunn" = "D - Transport",
+               "E - IT" = "E - IT",
+               "F - Fellesfunksjoner" = "F - Fellesfunksjoner",
+               "K - HR og HMS/Internrevisjonen/Kommunikasjon/\u00d8konomi" =
+                 "K - HR/\u00d8konomi",
+               "L - Myndighet og regelverk" = "L - Myndighet/regelverk")
   unname(div_new[division])
 }
 match_list_category <- function(cat, cat_type = "area") {
   if (cat_type == "area") {
-    cat_new <- c(`kommunikasjon` = "Kommunikasjon og samhandling",
-                 `informasjon` = "Informasjonssikkerhet og personvern",
-                 `programmer` = "Bruk av programvare",
-                 `utstyr` = "Bruk av teknologi",
-                 `all_comp` = "Alle kompetanser")
+    cat_new <- c("kommunikasjon" = "Kommunikasjon og samhandling",
+                 "informasjon" = "Informasjonssikkerhet og personvern",
+                 "programmer" = "Bruk av programvare",
+                 "utstyr" = "Bruk av teknologi",
+                 "all_comp" = "Alle kompetanser")
   } else if (cat_type == "competence") {
-    cat_new <- c(`Uerfaren` = "Uerfaren",
-                 `Grunnleggende` = "Grunnleggende",
-                 `Videregående` = "Videregående",
-                 `Avansert` = "Avansert")
+    cat_new <- c("Uerfaren" = "Uerfaren",
+                 "Grunnleggende" = "Grunnleggende",
+                 "Videreg\u00e5ende" = "Videreg\u00e5ende",
+                 "Avansert" = "Avansert")
   } else {
     stop("Unknown value for 'cat_type': set to either 'area' or 'comptenece'.")
   }
@@ -224,12 +230,11 @@ add_missing_kat <- function(df) {
   sam_unique <- get_sam_div_unique(df$SamDivision)
   if (length(change_vec) > 0) {
     for (i in 1:length(change_vec)) {
-      missing_kat <- df[df$SamDivision == change_vec[i], ][["kat_kommunikasjon"]]
+      tmp_plh <- "kat_kommunikasjon"
+      missing_kat <- df[df$SamDivision == change_vec[i], ][[tmp_plh]]
       missing_kat <- setdiff(c("Uerfaren",
                                "Grunnleggende",
-                               paste0("Videreg",
-                                      "\u00e5",
-                                      "ende"),
+                               "Videreg\u00e5ende",
                                "Avansert"),
                              missing_kat)
 
