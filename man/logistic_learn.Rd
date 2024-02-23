@@ -18,6 +18,12 @@ internally}
   \item 'experience': a two element vector giving the dependent
   variable levels (values coded to zero and one) that are being compared
  }}
+
+\item{type}{Character string specifying the type of logistic regression
+execution. "default" for a standard logistic regression model fitting and
+summary, "shinyDB" for a Shiny app-specific version that includes
+additional summaries like pseudo R-squared and odds ratios. The function
+will stop with an error if an unrecognized type is provided.}
 }
 \value{
 output as generated via \link[stats]{glm} but flavored with some

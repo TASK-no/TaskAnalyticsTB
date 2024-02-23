@@ -9,13 +9,13 @@ get_cls_infos(true_ones, preds, thrsh)
 \arguments{
 \item{true_ones}{Numeric vector of true class labels (0 or 1).}
 
-\item{preds}{Numeric vector of predicted probabilities for the positive class.}
+\item{preds}{Numeric vector of predicted probabilities for the positive class}
 
 \item{thrsh}{Numeric value specifying the threshold for classification.}
 }
 \value{
 A list containing the optimal cutoff, concordance, misclassification
-error, sensitivity, and one minus specificity.
+  error, sensitivity, and one minus specificity.
 }
 \description{
 Computes various classification metrics including the optimal cutoff for

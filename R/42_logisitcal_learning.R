@@ -42,8 +42,9 @@ get_data_for_prediction <- function(data_set, model) {
   data_short <- data_set %>% dplyr::select(dependent,
                                            dplyr::any_of(regressors))
 
+  tmp_cd_exp <- coding_experience[experience]
   data_out <- data_short %>%
-    dplyr::filter(as.integer(data_short[[dependent]]) %in% coding_experience[experience])
+    dplyr::filter(as.integer(data_short[[dependent]]) %in% tmp_cd_exp)
 
   return(data_out)
 }
@@ -62,6 +63,12 @@ get_data_for_prediction <- function(data_set, model) {
 #'   \item 'experience': a two element vector giving the dependent
 #'   variable levels (values coded to zero and one) that are being compared
 #'  }
+#' @param type Character string specifying the type of logistic regression
+#'   execution. "default" for a standard logistic regression model fitting and
+#'   summary, "shinyDB" for a Shiny app-specific version that includes
+#'   additional summaries like pseudo R-squared and odds ratios. The function
+#'   will stop with an error if an unrecognized type is provided.
+
 #'
 #' @return output as generated via \link[stats]{glm} but flavored with some
 #'   nicer printing structure and additional information; in the
@@ -97,16 +104,9 @@ logistic_predict <- function(data_set, model,
                                        model)
 
   truePRED <- as.integer(data_pred[[model$dependent]]) - 1
-
   predictions <- stats::predict(out1$logistic_model,
                                 newdata = data_pred[, -c(1)],
                                 type = "response")
-  # optCutOff21 <- InformationValue::optimalCutoff(truePRED, predictions)
-  # InformationValue::misClassError(truePRED, predictions, threshold = optCutOff21)
-  # InformationValue::plotROC(truePRED, predictions,  Show.labels = TRUE)
-  # InformationValue::Concordance(truePRED, predictions)
-  # InformationValue::sensitivity(truePRED, predictions, threshold = optCutOff21)
-  # InformationValue::specificity(truePRED, predictions, threshold = optCutOff21)
 }
 logistic_learn_def <- function(data_set, model) {
   dependent  <- model$dependent
@@ -126,7 +126,8 @@ logistic_learn_def <- function(data_set, model) {
   summary_logistic_model <- summary(logistic_model)
   summary_odds <- exp(summary_logistic_model$coefficients[, 1, drop = FALSE])
   colnames(summary_odds) <- "Odds"
-  summary_logistic_model[["coefficients"]] <- cbind(summary_logistic_model[["coefficients"]], summary_odds)
+  tmp_coef_bind <- cbind(summary_logistic_model[["coefficients"]], summary_odds)
+  summary_logistic_model[["coefficients"]] <- tmp_coef_bind
 
   output <- list(logistic_model = logistic_model,
                  summary_logistic_model = summary_logistic_model,
@@ -145,17 +146,17 @@ logistic_learn_shy <- function(data_set, model) {
   check_match   <- check_forumula_data_match(data_short, model_formula)
 
   if (isTRUE(check_match)) {
-    logistic_out <- tryCatch(stats::glm(model_formula,
-                                        data = data_short,
-                                        family = stats::binomial(link = "logit")),
-                             warning = function(w) {
-                               return(
-                                 list(
-                                   out = stats::glm(model_formula,
-                                                    data = data_short,
-                                                    family = stats::binomial(link = "logit")),
-                                   mywarn = w))
-                             })
+    logistic_out <- tryCatch(stats::glm(
+      model_formula,
+      data = data_short,
+      family = stats::binomial(link = "logit")),
+      warning = function(w) {
+        return(list(out = stats::glm(model_formula,
+                                     data = data_short,
+                                     family = stats::binomial(link = "logit")),
+                    mywarn = w))
+        }
+    )
     if (names(logistic_out)[2] == "mywarn") {
       logistic_out_cnv <- grepl("converge", logistic_out[[2]][[1]])
       logistic_out_num <- grepl("numerically", logistic_out[[2]][[1]])
@@ -225,7 +226,7 @@ get_logistic_odds_probs <- function(log_out) {
   }
   colnames(tmp_out) <- c("Oddsratio",
                          "KI nedre grense",
-                         "KI øvre grense")
+                         "KI \u00f8vre grense")
   tmp_out
 }
 comput_odds <- function(log_model_output, WITH_CI) {
@@ -313,11 +314,11 @@ generate_predictions <- function(logistic_model,
 #' specificity based on true outcomes and predicted probabilities.
 #'
 #' @param true_ones Numeric vector of true class labels (0 or 1).
-#' @param preds Numeric vector of predicted probabilities for the positive class.
+#' @param preds Numeric vector of predicted probabilities for the positive class
 #' @param thrsh Numeric value specifying the threshold for classification.
 #'
 #' @return A list containing the optimal cutoff, concordance, misclassification
-#' error, sensitivity, and one minus specificity.
+#'   error, sensitivity, and one minus specificity.
 #' @export
 get_cls_infos <- function(true_ones, preds, thrsh) {
   if (is.null(true_ones) || is.null(preds)) return(NULL)
